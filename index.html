@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PACKING LIST GENERATOR - AD DAFFODILS</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- html2pdf bundle for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <!-- html2canvas for JPG export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Strict Printable Sheet Dimensions */
+    .packing-sheet {
+      background-color: #FFFFFF;
+      color: #333333;
+      width: 210mm;
+      min-height: 297mm;
+      padding: 15mm 18mm;
+      margin: 0 auto;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Header Color matching sample image */
+    .brand-title {
+      color: #5C3A21;
+    }
+
+    /* Table Design matching image exactly */
+    .packing-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .packing-table th {
+      background-color: #C8BFB8;
+      color: #333333;
+      border: 1.5px solid #A89F97;
+      padding: 10px 8px;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .packing-table td {
+      border: 1.5px solid #C8BFB8;
+      padding: 8px 10px;
+      font-size: 11px;
+      color: #222222;
+    }
+
+    .total-box {
+      background-color: #C8BFB8;
+      border: 1.5px solid #A89F97;
+      color: #222222;
+    }
+
+    @media print {
+      body { background: white !important; padding: 0 !important; }
+      .no-print { display: none !important; }
+      .packing-sheet {
+        box-shadow: none !important;
+        width: 210mm !important;
+        padding: 15mm 18mm !important;
+        margin: 0 !important;
+      }
+    }
+  </style>
+</head>
+<body class="p-2 md:p-6 min-h-screen">
+
+<!-- Top Action Header Bar -->
+<div class="max-w-[1320px] mx-auto mb-4 flex flex-wrap justify-between items-center bg-slate-800 p-4 rounded-xl gap-3 no-print border border-slate-700 shadow-lg">
+  <div class="flex items-center gap-3">
+    <div class="bg-amber-800 text-white px-3 py-1 rounded-lg font-black text-xl tracking-wider">PL</div>
+    <div>
+      <h1 class="text-amber-400 font-extrabold text-lg leading-tight">PACKING LIST GENERATOR</h1>
+      <p class="text-xs text-slate-400">Cargo & Consignment Logistics</p>
+    </div>
+  </div>
+  
+  <div class="flex flex-wrap items-center gap-2.5">
+    <button onclick="exportJPG()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-4 py-2 rounded-lg text-xs transition shadow flex items-center gap-1.5">
+      <span>🖼 Export JPG</span>
+    </button>
+    <button onclick="exportPDF()" class="bg-rose-600 hover:bg-rose-500 text-white font-semibold px-4 py-2 rounded-lg text-xs transition shadow flex items-center gap-1.5">
+      <span>📄 Export PDF</span>
+    </button>
+  </div>
+</div>
+
+<!-- Main Workspace -->
+<div class="max-w-[1320px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+  <!-- LEFT COLUMN: Control Panel -->
+  <div class="lg:col-span-5 bg-slate-800 p-4 md:p-5 rounded-2xl border border-slate-700 space-y-4 no-print max-h-[88vh] overflow-y-auto shadow-xl">
+    <h2 class="text-base font-bold text-slate-100 border-b border-slate-700 pb-2">⚙️ Control Panel</h2>
+
+    <!-- Metadata Section -->
+    <div class="space-y-3">
+      <div class="font-bold text-xs text-amber-400 uppercase tracking-wider">1. Basic Info</div>
+      <div>
+        <label class="block text-[11px] font-semibold text-slate-300 mb-1">Date</label>
+        <input type="text" id="inputDate" value="3.9.2026" oninput="updateSheet()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-amber-500">
+      </div>
+    </div>
+
+    <!-- Sender Details -->
+    <div class="space-y-2 pt-2 border-t border-slate-700">
+      <div class="font-bold text-xs text-amber-400 uppercase tracking-wider">2. Sender Details</div>
+      <input type="text" id="inputSenderName" value="Sandar Chit" placeholder="Sender Name" oninput="updateSheet()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 mb-2">
+      <input type="text" id="inputEori" value="GB047308128000" placeholder="EORI No" oninput="updateSheet()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 mb-2">
+      <input type="text" id="inputPhone" value="+447861489456" placeholder="Phone" oninput="updateSheet()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 mb-2">
+      <textarea id="inputAddress" rows="2" oninput="updateSheet()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-amber-500">79 Oval Road North
+Dagenham, London, RM10 9ET.</textarea>
+    </div>
+
+    <!-- Receiver / Consignee Details -->
+    <div class="space-y-2 pt-2 border-t border-slate-700">
+      <div class="font-bold text-xs text-amber-400 uppercase tracking-wider">3. Receiver Details</div>
+      <input type="text" id="inputReceiverCompany" value="MESHA SUNSHINE ENTERPRISE" placeholder="Company / Receiver Name" oninput="updateSheet()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 mb-2 font-bold">
+      <textarea id="inputReceiverAddress" rows="3" oninput="updateSheet()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-amber-500">Blok A-7-6 Delima Apartment
+Jalan Bukit Delima 2,
+70200 Seremban,Negeri Sembilan</textarea>
+    </div>
+
+    <!-- Items Section -->
+    <div class="pt-2 border-t border-slate-700 space-y-3">
+      <div class="flex justify-between items-center">
+        <span class="font-bold text-xs text-amber-400 uppercase tracking-wider">4. Item List</span>
+        <button onclick="addRow()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-2.5 py-1 rounded-lg font-bold transition flex items-center gap-1">
+          <span>+ Add Row</span>
+        </button>
+      </div>
+
+      <div id="itemInputs" class="space-y-2.5">
+        <!-- Input rows dynamically injected by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN: Printable Live Preview -->
+  <div class="lg:col-span-7 flex justify-center items-start overflow-x-auto p-2">
+    <div id="packingContainer">
+      <div id="packingSheet" class="packing-sheet">
+        
+        <div>
+          <!-- Title Section -->
+          <div class="text-center pt-2 pb-6">
+            <h1 class="text-2xl font-black brand-title tracking-wider uppercase">PACKING LISTS</h1>
+          </div>
+
+          <!-- Header Details Grid -->
+          <div class="grid grid-cols-12 gap-4 text-xs font-semibold mb-6">
+            <!-- Left Side: Date & Sender -->
+            <div class="col-span-7 space-y-1">
+              <div class="mb-3">Date: <span id="viewDate">3.9.2026</span></div>
+              <div>Sender : <span id="viewSenderName">Sandar Chit</span></div>
+              <div>EORI No: <span id="viewEori">GB047308128000</span></div>
+              <div>Phone : <span id="viewPhone">+447861489456</span></div>
+              <div class="flex items-start">
+                <span class="shrink-0">Address :&nbsp;</span>
+                <span id="viewAddress" class="whitespace-pre-line">79 Oval Road North
+Dagenham, London, RM10 9ET.</span>
+              </div>
+            </div>
+
+            <!-- Right Side: Receiver Company -->
+            <div class="col-span-5 text-left space-y-0.5">
+              <div id="viewReceiverCompany" class="font-bold uppercase leading-tight mb-1">MESHA SUNSHINE ENTERPRISE</div>
+              <div id="viewReceiverAddress" class="whitespace-pre-line text-stone-700 leading-normal">Blok A-7-6 Delima Apartment
+Jalan Bukit Delima 2,
+70200 Seremban,Negeri Sembilan</div>
+            </div>
+          </div>
+
+          <!-- Table Section -->
+          <table class="packing-table">
+            <thead>
+              <tr>
+                <th style="width: 12%; text-align: center;">NO</th>
+                <th style="width: 53%; text-align: center;">DESCRIPTIONS</th>
+                <th style="width: 18%; text-align: center;">NUMBER OF BOXES</th>
+                <th style="width: 17%; text-align: center;">TOTAL</th>
+              </tr>
+            </thead>
+            <tbody id="viewTableBody">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Grand Total Block -->
+        <div class="flex justify-end pt-4 pb-2">
+          <div class="total-box px-6 py-2 rounded-sm font-black text-stone-900 text-base tracking-wide border-2">
+            £ <span id="viewGrandTotal">80,000</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let items = [
+  { desc: "MACHINE", boxes: 12, total: 6000 },
+  { desc: "SHOES BOX", boxes: 10, total: 6000 },
+  { desc: "KID CLOTHING SMOCK DRESS, FLOWER DRESS", boxes: 10, total: 6000 },
+  { desc: "BABY GOODS AS IN MILK POWDER, PORRIDGE AND SNACKS", boxes: 10, total: 7000 },
+  { desc: "GEORGE CLOTHING BLANKET, BEDSHEET AND PAJAMAS", boxes: 10, total: 6000 },
+  { desc: "KID SCHOOL LUNCH BOXES, STATIONARY, KID SNACKS & PUFFS, KID PUREE", boxes: 10, total: 6000 },
+  { desc: "KID PLAYSET, SOFT TOYS, KID SLIPPERS, COOKIES", boxes: 10, total: 6000 },
+  { desc: "ZARA CLOTHING", boxes: 19, total: 6500 },
+  { desc: "MANGO CLOTHING HOODIES, PANTS, SWEATSHIRT", boxes: 10, total: 5500 },
+  { desc: "GOLF STICKS", boxes: 1, total: 2000 },
+  { desc: "MATALAN KID CLOTHING", boxes: 10, total: 6000 },
+  { desc: "SKIN CARE FACE CREAM, FACIAL WASH, TONER, MOISTURIZER", boxes: 10, total: 6000 },
+  { desc: "KID CLOTHING, DRESS, TROUSERS", boxes: 10, total: 6000 },
+  { desc: "H&M CLOTHING", boxes: 10, total: 5000 }
+];
+
+function renderItemInputs() {
+  const container = document.getElementById('itemInputs');
+  container.innerHTML = '';
+
+  items.forEach((item, index) => {
+    const div = document.createElement('div');
+    div.className = 'bg-slate-900 p-2.5 rounded-xl border border-slate-700/80 space-y-2 text-xs';
+    div.innerHTML = `
+      <div class="flex items-center justify-between gap-2">
+        <span class="text-amber-400 font-bold text-[11px]">#${index + 1}</span>
+        <input type="text" value="${item.desc}" oninput="updateItemField(${index}, 'desc', this.value)" placeholder="Description" class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-slate-100 font-semibold flex-1 text-xs uppercase">
+        <button onclick="removeRow(${index})" class="text-rose-400 hover:text-rose-300 font-bold px-1 py-0.5 rounded transition">✕</button>
+      </div>
+      <div class="grid grid-cols-2 gap-2 text-[11px]">
+        <div class="flex items-center gap-1">
+          <span class="text-slate-400">Boxes:</span>
+          <input type="number" value="${item.boxes}" oninput="updateItemField(${index}, 'boxes', parseInt(this.value)||0)" class="bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-slate-100 w-full text-center">
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="text-slate-400">Total: £</span>
+          <input type="number" value="${item.total}" oninput="updateItemField(${index}, 'total', parseFloat(this.value)||0)" class="bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-emerald-400 font-bold w-full text-center">
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function updateItemField(index, field, value) {
+  items[index][field] = value;
+  updateSheet();
+}
+
+function addRow() {
+  items.push({ desc: "", boxes: 1, total: 0 });
+  renderItemInputs();
+  updateSheet();
+}
+
+function removeRow(index) {
+  if (items.length > 1) {
+    items.splice(index, 1);
+    renderItemInputs();
+    updateSheet();
+  }
+}
+
+function updateSheet() {
+  document.getElementById('viewDate').innerText = document.getElementById('inputDate').value;
+  document.getElementById('viewSenderName').innerText = document.getElementById('inputSenderName').value;
+  document.getElementById('viewEori').innerText = document.getElementById('inputEori').value;
+  document.getElementById('viewPhone').innerText = document.getElementById('inputPhone').value;
+  document.getElementById('viewAddress').innerText = document.getElementById('inputAddress').value;
+
+  document.getElementById('viewReceiverCompany').innerText = document.getElementById('inputReceiverCompany').value;
+  document.getElementById('viewReceiverAddress').innerText = document.getElementById('inputReceiverAddress').value;
+
+  const tbody = document.getElementById('viewTableBody');
+  tbody.innerHTML = '';
+
+  let grandTotal = 0;
+
+  items.forEach((item, index) => {
+    grandTotal += (item.total || 0);
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="text-align: center; font-weight: 700;">${index + 1}</td>
+      <td style="font-weight: 600; uppercase;">${item.desc}</td>
+      <td style="text-align: center; font-weight: 600;">${item.boxes}</td>
+      <td style="text-align: center; font-weight: 700;">£${Number(item.total).toLocaleString()}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('viewGrandTotal').innerText = Number(grandTotal).toLocaleString();
+}
+
+function exportJPG() {
+  const sheet = document.getElementById('packingSheet');
+  html2canvas(sheet, { scale: 3, useCORS: true, allowTaint: true }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = `Packing_List_${document.getElementById('inputDate').value}.jpg`;
+    link.href = canvas.toDataURL('image/jpeg', 1.0);
+    link.click();
+  });
+}
+
+function exportPDF() {
+  const element = document.getElementById('packingSheet');
+  const opt = {
+    margin: 0,
+    filename: `Packing_List_${document.getElementById('inputDate').value}.pdf`,
+    image: { type: 'jpeg', quality: 1.0 },
+    html2canvas: { scale: 3, useCORS: true, allowTaint: true },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+  html2pdf().set(opt).from(element).save();
+}
+
+window.onload = function() {
+  renderItemInputs();
+  updateSheet();
+};
+</script>
+</body>
+</html>
