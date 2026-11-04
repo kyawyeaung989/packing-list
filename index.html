@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>A3 ADVANCED PACKING LIST - AD DAFFODILS</title>
+  <title>A3 PACKING LIST SYSTEM - AD DAFFODILS</title>
   
   <!-- html2pdf bundle for PDF export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -23,7 +23,7 @@
     }
 
     .app-header {
-      max-width: 1520px;
+      max-width: 100%;
       margin: 0 auto 16px auto;
       background-color: #1e293b;
       padding: 16px;
@@ -38,16 +38,15 @@
     }
 
     .main-grid {
-      max-width: 1520px;
-      margin: 0 auto;
+      width: 100%;
       display: grid;
       grid-template-columns: 1fr;
       gap: 24px;
     }
 
-    @media (min-width: 1024px) {
+    @media (min-width: 1200px) {
       .main-grid {
-        grid-template-columns: 4fr 8fr;
+        grid-template-columns: 420px 1fr;
       }
     }
 
@@ -92,7 +91,7 @@
       background-color: #0f172a;
       border: 1px solid #334155;
       border-radius: 8px;
-      padding: 6px 10px;
+      padding: 6px 8px;
       font-size: 12px;
       color: #f8fafc;
       outline: none;
@@ -103,7 +102,7 @@
     }
 
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; }
+    .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; }
 
     .btn {
       border: none;
@@ -124,13 +123,16 @@
     .btn-rose { background-color: #e11d48; }  .btn-rose:hover { background-color: #f43f5e; }
     .btn-action { padding: 8px 16px; font-size: 12px; border-radius: 8px; }
 
-    /* A3 LANDSCAPE SHEET LAYOUT - SCALED FOR PERFECT SCREEN VIEW */
-    .invoice-wrapper {
+    .preview-container {
       width: 100%;
       overflow-x: auto;
+      background-color: #020617;
+      padding: 20px;
+      border-radius: 16px;
+      border: 1px solid #334155;
       display: flex;
-      justify-content: center;
-      padding: 10px;
+      justify-content: flex-start;
+      align-items: flex-start;
     }
 
     .invoice-sheet {
@@ -159,14 +161,14 @@
       background: linear-gradient(135deg, #3d2b1f 0%, #1e130c 100%);
       border: 2px solid #d97706;
       border-radius: 10px;
-      padding: 8px 14px;
+      padding: 10px 18px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     }
 
     @media print {
       body { background: white !important; padding: 0 !important; }
       .no-print { display: none !important; }
-      .invoice-wrapper { overflow: visible !important; padding: 0 !important; }
+      .preview-container { padding: 0 !important; background: none !important; border: none !important; overflow: visible !important; }
       .invoice-sheet {
         box-shadow: none !important;
         width: 420mm !important;
@@ -176,9 +178,9 @@
       }
     }
 
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-track { background: #1e293b; }
-    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
     .hidden { display: none !important; }
   </style>
 </head>
@@ -189,8 +191,8 @@
     <div style="background-color: #b45309; color: white; padding: 4px 12px; border-radius: 8px; font-weight: 900; font-size: 20px;">A3</div>
     <div>
       <div style="display: flex; align-items: center; gap: 8px;">
-        <h1 style="color: #fbbf24; font-weight: 800; font-size: 18px; line-height: 1.2;">A3 LANDSCAPE PACKING LIST WITH IMAGES</h1>
-        <span style="font-size: 10px; background-color: rgba(16, 185, 129, 0.2); color: #6ee7b7; font-weight: 700; padding: 2px 8px; border-radius: 9999px; border: 1px solid rgba(16, 185, 129, 0.3);">Fixed View</span>
+        <h1 style="color: #fbbf24; font-weight: 800; font-size: 18px; line-height: 1.2;">ADVANCED PACKING LIST SYSTEM</h1>
+        <span style="font-size: 10px; background-color: rgba(16, 185, 129, 0.2); color: #6ee7b7; font-weight: 700; padding: 2px 8px; border-radius: 9999px; border: 1px solid rgba(16, 185, 129, 0.3);">V14 Layout Perfected</span>
       </div>
       <p style="font-size: 12px; color: #94a3b8; margin-top: 2px;">AD DAFFODILS Consignment Logistics System</p>
     </div>
@@ -206,7 +208,7 @@
   <div class="control-panel no-print">
     <div style="font-size: 16px; font-weight: 700; color: #f8fafc; border-bottom: 1px solid #334155; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
       <span>⚙️ Control Panel</span>
-      <span style="font-size: 12px; color: #34d399;">A3 Pro Mode</span>
+      <span style="font-size: 12px; color: #34d399;">Pro Mode</span>
     </div>
 
     <div class="card-box">
@@ -280,19 +282,20 @@
     </div>
   </div>
 
-  <div class="invoice-wrapper">
+  <div class="preview-container no-print">
     <div id="invoiceContainer">
       <div id="invoice" class="invoice-sheet">
         <div>
           <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 16px; border-bottom: 1px solid rgba(120, 53, 15, 0.2);">
             
-            <div id="logoHeaderBlock" style="min-width: 180px; min-height: 60px; display: flex; align-items: center;">
-              <div id="imageLogoWrapper" class="hidden" style="width: 192px; height: 64px; overflow: hidden;">
+            <!-- LARGER CLEAR LOGO BLOCK -->
+            <div id="logoHeaderBlock" style="min-width: 220px; min-height: 75px; display: flex; align-items: center;">
+              <div id="imageLogoWrapper" class="hidden" style="width: 240px; height: 80px; overflow: hidden;">
                 <img id="viewLogoImg" src="" alt="AD DAFFODILS Logo" style="max-width: 100%; max-height: 100%; object-fit: contain;">
               </div>
               <div id="textLogoWrapper" class="styled-text-logo">
-                <div style="color: #fbbf24; font-weight: 900; font-size: 18px; letter-spacing: 0.05em; text-transform: uppercase; line-height: 1;">AD DAFFODILS</div>
-                <div style="color: #e2e8f0; font-weight: 700; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px;">CONSIGNMENT</div>
+                <div style="color: #fbbf24; font-weight: 900; font-size: 21px; letter-spacing: 0.05em; text-transform: uppercase; line-height: 1;">AD DAFFODILS</div>
+                <div style="color: #e2e8f0; font-weight: 700; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 5px;">CONSIGNMENT</div>
               </div>
             </div>
 
@@ -330,16 +333,17 @@
             <div>Total Vol: <span id="viewTotalCbm">0.00</span></div>
           </div>
 
-          <table style="width: 100%; border-collapse: collapse; margin: 4px 0; font-size: 11px; text-align: left;">
+          <!-- BALANCED TABLE: WIDER BOX IMAGE & COMPACT DESCRIPTION -->
+          <table style="width: 100%; table-layout: fixed; border-collapse: collapse; margin: 4px 0; font-size: 11px; text-align: left;">
             <thead>
               <tr class="table-header" style="font-size: 10px; text-transform: uppercase;">
-                <th style="padding: 8px 6px; font-weight: 700; border-radius: 2px 0 0 2px; width: 6%; text-align: center;">Box</th>
-                <th style="padding: 8px 8px; font-weight: 700; width: 12%; text-align: center;">Box Image</th>
-                <th style="padding: 8px 10px; font-weight: 700; width: 34%;">Description</th>
-                <th style="padding: 8px 10px; font-weight: 700; text-align: right; width: 10%;">Kg</th>
-                <th style="padding: 8px 10px; font-weight: 700; text-align: center; width: 14%;">Dimension (cm)</th>
-                <th style="padding: 8px 10px; font-weight: 700; text-align: right; width: 10%;">Volume</th>
-                <th style="padding: 8px 6px; font-weight: 700; border-radius: 0 2px 2px 0; width: 14%; text-align: center;">Remark</th>
+                <th style="padding: 10px 4px; font-weight: 700; border-radius: 2px 0 0 2px; width: 5%; text-align: center;">Box</th>
+                <th style="padding: 10px 8px; font-weight: 700; width: 22%; text-align: center;">Box Image</th>
+                <th style="padding: 10px 10px; font-weight: 700; width: 26%;">Description</th>
+                <th style="padding: 10px 8px; font-weight: 700; text-align: right; width: 10%;">Kg</th>
+                <th style="padding: 10px 8px; font-weight: 700; text-align: center; width: 15%;">Dimension (cm)</th>
+                <th style="padding: 10px 8px; font-weight: 700; text-align: right; width: 11%;">Volume</th>
+                <th style="padding: 10px 6px; font-weight: 700; border-radius: 0 2px 2px 0; width: 11%; text-align: center;">Remark</th>
               </tr>
             </thead>
             <tbody id="viewTableBody"></tbody>
@@ -359,7 +363,7 @@ let items = [
   { desc: "Clothes, Books", kg: 18.35, l: 60, w: 50, h: 38, remark: "", img: "" }
 ];
 
-const DB_NAME = 'ADDaffodilsPackingDBV9';
+const DB_NAME = 'ADDaffodilsPackingDBV14';
 const DB_VERSION = 1;
 const STORE_NAME = 'assets';
 
@@ -375,44 +379,56 @@ function openDB() {
   });
 }
 
-async function saveLogoToDB(dataUrl) {
+async function saveToDB(key, value) {
   try {
     const db = await openDB();
     const tx = db.transaction(STORE_NAME, 'readwrite');
-    tx.objectStore(STORE_NAME).put(dataUrl, 'companyLogo');
+    tx.objectStore(STORE_NAME).put(value, key);
   } catch (err) { console.error(err); }
 }
 
-async function getLogoFromDB() {
+async function getFromDB(key) {
   try {
     const db = await openDB();
     return new Promise((resolve) => {
       const tx = db.transaction(STORE_NAME, 'readonly');
-      const req = tx.objectStore(STORE_NAME).get('companyLogo');
+      const req = tx.objectStore(STORE_NAME).get(key);
       req.onsuccess = () => resolve(req.result || null);
       req.onerror = () => resolve(null);
     });
   } catch (err) { return null; }
 }
 
-async function deleteLogoFromDB() {
+async function deleteFromDB(key) {
   try {
     const db = await openDB();
     const tx = db.transaction(STORE_NAME, 'readwrite');
-    tx.objectStore(STORE_NAME).delete('companyLogo');
+    tx.objectStore(STORE_NAME).delete(key);
   } catch (err) { console.error(err); }
 }
 
 async function init() {
   await loadSavedLogo();
+  await loadSavedItems();
   loadSavedRefNumber();
   setTodayDate();
   renderItemInputs();
   updateInvoice();
 }
 
+async function loadSavedItems() {
+  const savedItems = await getFromDB('packing_items_list');
+  if (savedItems && Array.isArray(savedItems) && savedItems.length > 0) {
+    items = savedItems;
+  }
+}
+
+async function saveItemsState() {
+  await saveToDB('packing_items_list', items);
+}
+
 function loadSavedRefNumber() {
-  const savedRef = localStorage.getItem('addaffodils_last_ref_v9');
+  const savedRef = localStorage.getItem('addaffodils_last_ref_v14');
   if (savedRef) document.getElementById('inputInvNo').value = savedRef;
 }
 
@@ -444,7 +460,7 @@ function setTodayDate() {
 }
 
 async function loadSavedLogo() {
-  const savedLogo = await getLogoFromDB();
+  const savedLogo = await getFromDB('companyLogo');
   if (savedLogo) displayImageLogo(savedLogo);
   else displayTextLogo();
 }
@@ -471,32 +487,34 @@ async function handleLogoUpload(event) {
     reader.onload = async function(e) {
       const base64Image = e.target.result;
       displayImageLogo(base64Image);
-      await saveLogoToDB(base64Image);
+      await saveToDB('companyLogo', base64Image);
     };
     reader.readAsDataURL(file);
   }
 }
 
 async function clearLogo() {
-  await deleteLogoFromDB();
+  await deleteFromDB('companyLogo');
   displayTextLogo();
 }
 
-function handleBoxImageUpload(event, index) {
+async function handleBoxImageUpload(event, index) {
   const file = event.target.files[0];
   if (file) {
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = async function(e) {
       items[index].img = e.target.result;
-      renderItemInputs(); // Re-render inputs to show remove button
-      updateInvoice();    // Update preview
+      await saveItemsState();
+      renderItemInputs();
+      updateInvoice();
     };
     reader.readAsDataURL(file);
   }
 }
 
-function removeBoxImage(index) {
+async function removeBoxImage(index) {
   items[index].img = "";
+  await saveItemsState();
   renderItemInputs();
   updateInvoice();
 }
@@ -520,48 +538,50 @@ function renderItemInputs() {
           <input type="file" accept="image/*" onchange="handleBoxImageUpload(event, ${index})" style="font-size: 10px; flex: 1;">
           ${item.img ? `<button onclick="removeBoxImage(${index})" class="btn btn-rose" style="padding: 4px 8px; font-size: 9px;">Remove</button>` : ''}
         </div>
-        ${item.img ? `<div style="margin-top: 4px;"><img src="${item.img}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #f59e0b;"></div>` : ''}
+        ${item.img ? `<div style="margin-top: 4px;"><img src="${item.img}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #f59e0b;"></div>` : ''}
       </div>
       <div>
         <label>Description:</label>
-        <input type="text" id="desc_${index}" value="${item.desc}" oninput="items[${index}].desc = this.value; updateInvoice();" placeholder="Box items description">
+        <input type="text" id="desc_${index}" value="${item.desc}" oninput="items[${index}].desc = this.value; saveItemsState(); updateInvoice();" placeholder="Box items description">
       </div>
       <div class="grid-4">
         <div>
           <label>Kg:</label>
-          <input type="number" step="0.01" id="kg_${index}" value="${item.kg}" oninput="items[${index}].kg = parseFloat(this.value)||0; updateInvoice();" style="text-align: center; font-weight: 700;">
+          <input type="number" step="0.01" id="kg_${index}" value="${item.kg}" oninput="items[${index}].kg = parseFloat(this.value)||0; saveItemsState(); updateInvoice();" style="text-align: center; font-weight: 700;">
         </div>
         <div>
           <label>L (cm):</label>
-          <input type="number" step="1" id="l_${index}" value="${item.l}" oninput="items[${index}].l = parseFloat(this.value)||0; updateInvoice();" style="text-align: center;">
+          <input type="number" step="1" id="l_${index}" value="${item.l}" oninput="items[${index}].l = parseFloat(this.value)||0; saveItemsState(); updateInvoice();" style="text-align: center;">
         </div>
         <div>
           <label>W (cm):</label>
-          <input type="number" step="1" id="w_${index}" value="${item.w}" oninput="items[${index}].w = parseFloat(this.value)||0; updateInvoice();" style="text-align: center;">
+          <input type="number" step="1" id="w_${index}" value="${item.w}" oninput="items[${index}].w = parseFloat(this.value)||0; saveItemsState(); updateInvoice();" style="text-align: center;">
         </div>
         <div>
           <label>H (cm):</label>
-          <input type="number" step="1" id="h_${index}" value="${item.h}" oninput="items[${index}].h = parseFloat(this.value)||0; updateInvoice();" style="text-align: center;">
+          <input type="number" step="1" id="h_${index}" value="${item.h}" oninput="items[${index}].h = parseFloat(this.value)||0; saveItemsState(); updateInvoice();" style="text-align: center;">
         </div>
       </div>
       <div>
         <label>Remark / Owner:</label>
-        <input type="text" id="remark_${index}" value="${item.remark || ''}" oninput="items[${index}].remark = this.value; updateInvoice();" placeholder="Optional remark">
+        <input type="text" id="remark_${index}" value="${item.remark || ''}" oninput="items[${index}].remark = this.value; saveItemsState(); updateInvoice();" placeholder="Optional remark">
       </div>
     `;
     container.appendChild(div);
   });
 }
 
-function addItem() {
+async function addItem() {
   items.push({ desc: "Clothes", kg: 10, l: 50, w: 40, h: 40, remark: "", img: "" });
+  await saveItemsState();
   renderItemInputs();
   updateInvoice();
 }
 
-function removeItem(index) {
+async function removeItem(index) {
   if (items.length > 1) {
     items.splice(index, 1);
+    await saveItemsState();
     renderItemInputs();
     updateInvoice();
   }
@@ -573,7 +593,7 @@ function updateInvoiceOnly() {
 
 function updateInvoice() {
   const currentInv = document.getElementById('inputInvNo').value;
-  localStorage.setItem('addaffodils_last_ref_v9', currentInv);
+  localStorage.setItem('addaffodils_last_ref_v14', currentInv);
 
   const divisor = parseFloat(document.getElementById('inputDivisor').value) || 5000;
 
@@ -601,19 +621,19 @@ function updateInvoice() {
     tr.style.fontWeight = '600';
     tr.style.color = '#1c1917';
 
-    let imgHtml = `<span style="color: #78716c; font-size: 9px; font-style: italic;">No Photo</span>`;
+    let imgHtml = `<span style="color: #78716c; font-size: 10px; font-style: italic;">No Photo</span>`;
     if (item.img) {
-      imgHtml = `<img src="${item.img}" style="width: 48px; height: 48px; object-fit: cover; border-radius: 4px; border: 1px solid #9e7b5c;">`;
+      imgHtml = `<img src="${item.img}" style="width: 105px; height: 105px; object-fit: cover; border-radius: 6px; border: 1px solid #9e7b5c; box-shadow: 0 3px 6px rgba(0,0,0,0.15);">`;
     }
 
     tr.innerHTML = `
-      <td style="padding: 8px 6px; text-align: center; font-weight: 800; vertical-align: middle;">${index + 1}</td>
-      <td style="padding: 8px 8px; text-align: center; vertical-align: middle;">${imgHtml}</td>
-      <td style="padding: 8px 10px; vertical-align: middle;">${item.desc}</td>
-      <td style="padding: 8px 10px; text-align: right; font-weight: 700; vertical-align: middle;">${item.kg.toFixed(2)}</td>
-      <td style="padding: 8px 10px; text-align: center; font-size: 10px; color: #57534e; vertical-align: middle;">${item.l} × ${item.w} × ${item.h}</td>
-      <td style="padding: 8px 10px; text-align: right; vertical-align: middle;">${vol.toFixed(2)}</td>
-      <td style="padding: 8px 6px; text-align: center; font-weight: 700; color: #92400e; vertical-align: middle;">${item.remark || ''}</td>
+      <td style="padding: 12px 4px; text-align: center; font-weight: 800; vertical-align: middle;">${index + 1}</td>
+      <td style="padding: 12px 8px; text-align: center; vertical-align: middle;">${imgHtml}</td>
+      <td style="padding: 12px 10px; vertical-align: middle; word-break: break-word;">${item.desc}</td>
+      <td style="padding: 12px 8px; text-align: right; font-weight: 700; vertical-align: middle;">${item.kg.toFixed(2)}</td>
+      <td style="padding: 12px 8px; text-align: center; font-size: 10px; color: #57534e; vertical-align: middle;">${item.l} × ${item.w} × ${item.h}</td>
+      <td style="padding: 12px 8px; text-align: right; vertical-align: middle;">${vol.toFixed(2)}</td>
+      <td style="padding: 12px 6px; text-align: center; font-weight: 700; color: #92400e; vertical-align: middle;">${item.remark || ''}</td>
     `;
     tbody.appendChild(tr);
   });
