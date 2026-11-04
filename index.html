@@ -124,7 +124,15 @@
     .btn-rose { background-color: #e11d48; }  .btn-rose:hover { background-color: #f43f5e; }
     .btn-action { padding: 8px 16px; font-size: 12px; border-radius: 8px; }
 
-    /* A3 LANDSCAPE SHEET LAYOUT */
+    /* A3 LANDSCAPE SHEET LAYOUT - SCALED FOR PERFECT SCREEN VIEW */
+    .invoice-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      display: flex;
+      justify-content: center;
+      padding: 10px;
+    }
+
     .invoice-sheet {
       background-color: #ECE3D4;
       color: #3D2B1F;
@@ -132,13 +140,12 @@
       min-height: 297mm;
       height: 297mm;
       padding: 12mm 15mm;
-      margin: 0 auto;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       position: relative;
-      overflow: hidden;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      flex-shrink: 0;
     }
 
     .theme-banner { background-color: #9E7B5C; color: #FFFFFF; }
@@ -159,6 +166,7 @@
     @media print {
       body { background: white !important; padding: 0 !important; }
       .no-print { display: none !important; }
+      .invoice-wrapper { overflow: visible !important; padding: 0 !important; }
       .invoice-sheet {
         box-shadow: none !important;
         width: 420mm !important;
@@ -168,7 +176,7 @@
       }
     }
 
-    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #1e293b; }
     ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
     .hidden { display: none !important; }
@@ -182,7 +190,7 @@
     <div>
       <div style="display: flex; align-items: center; gap: 8px;">
         <h1 style="color: #fbbf24; font-weight: 800; font-size: 18px; line-height: 1.2;">A3 LANDSCAPE PACKING LIST WITH IMAGES</h1>
-        <span style="font-size: 10px; background-color: rgba(16, 185, 129, 0.2); color: #6ee7b7; font-weight: 700; padding: 2px 8px; border-radius: 9999px; border: 1px solid rgba(16, 185, 129, 0.3);">A3 Pro Mode</span>
+        <span style="font-size: 10px; background-color: rgba(16, 185, 129, 0.2); color: #6ee7b7; font-weight: 700; padding: 2px 8px; border-radius: 9999px; border: 1px solid rgba(16, 185, 129, 0.3);">Fixed View</span>
       </div>
       <p style="font-size: 12px; color: #94a3b8; margin-top: 2px;">AD DAFFODILS Consignment Logistics System</p>
     </div>
@@ -198,7 +206,7 @@
   <div class="control-panel no-print">
     <div style="font-size: 16px; font-weight: 700; color: #f8fafc; border-bottom: 1px solid #334155; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
       <span>⚙️ Control Panel</span>
-      <span style="font-size: 12px; color: #34d399;">A3 Image Mode</span>
+      <span style="font-size: 12px; color: #34d399;">A3 Pro Mode</span>
     </div>
 
     <div class="card-box">
@@ -272,7 +280,7 @@
     </div>
   </div>
 
-  <div style="display: flex; justify-content: center; overflow-x: auto; padding: 8px;">
+  <div class="invoice-wrapper">
     <div id="invoiceContainer">
       <div id="invoice" class="invoice-sheet">
         <div>
@@ -322,7 +330,6 @@
             <div>Total Vol: <span id="viewTotalCbm">0.00</span></div>
           </div>
 
-          <!-- A3 WIDE TABLE WITH IMAGE COLUMN -->
           <table style="width: 100%; border-collapse: collapse; margin: 4px 0; font-size: 11px; text-align: left;">
             <thead>
               <tr class="table-header" style="font-size: 10px; text-transform: uppercase;">
@@ -352,7 +359,7 @@ let items = [
   { desc: "Clothes, Books", kg: 18.35, l: 60, w: 50, h: 38, remark: "", img: "" }
 ];
 
-const DB_NAME = 'ADDaffodilsPackingDBV8';
+const DB_NAME = 'ADDaffodilsPackingDBV9';
 const DB_VERSION = 1;
 const STORE_NAME = 'assets';
 
@@ -405,7 +412,7 @@ async function init() {
 }
 
 function loadSavedRefNumber() {
-  const savedRef = localStorage.getItem('addaffodils_last_ref_v8');
+  const savedRef = localStorage.getItem('addaffodils_last_ref_v9');
   if (savedRef) document.getElementById('inputInvNo').value = savedRef;
 }
 
@@ -481,7 +488,8 @@ function handleBoxImageUpload(event, index) {
     const reader = new FileReader();
     reader.onload = function(e) {
       items[index].img = e.target.result;
-      updateInvoice();
+      renderItemInputs(); // Re-render inputs to show remove button
+      updateInvoice();    // Update preview
     };
     reader.readAsDataURL(file);
   }
@@ -489,8 +497,8 @@ function handleBoxImageUpload(event, index) {
 
 function removeBoxImage(index) {
   items[index].img = "";
-  updateInvoice();
   renderItemInputs();
+  updateInvoice();
 }
 
 function renderItemInputs() {
@@ -510,8 +518,9 @@ function renderItemInputs() {
         <label>Box Photo / Image:</label>
         <div style="display: flex; gap: 6px; align-items: center;">
           <input type="file" accept="image/*" onchange="handleBoxImageUpload(event, ${index})" style="font-size: 10px; flex: 1;">
-          ${item.img ? `<button onclick="removeBoxImage(${index})" class="btn btn-rose" style="padding: 4px 8px; font-size: 9px;">Remove Img</button>` : ''}
+          ${item.img ? `<button onclick="removeBoxImage(${index})" class="btn btn-rose" style="padding: 4px 8px; font-size: 9px;">Remove</button>` : ''}
         </div>
+        ${item.img ? `<div style="margin-top: 4px;"><img src="${item.img}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px; border: 1px solid #f59e0b;"></div>` : ''}
       </div>
       <div>
         <label>Description:</label>
@@ -564,7 +573,7 @@ function updateInvoiceOnly() {
 
 function updateInvoice() {
   const currentInv = document.getElementById('inputInvNo').value;
-  localStorage.setItem('addaffodils_last_ref_v8', currentInv);
+  localStorage.setItem('addaffodils_last_ref_v9', currentInv);
 
   const divisor = parseFloat(document.getElementById('inputDivisor').value) || 5000;
 
@@ -592,9 +601,9 @@ function updateInvoice() {
     tr.style.fontWeight = '600';
     tr.style.color = '#1c1917';
 
-    let imgHtml = `<span style="color: #94a3b8; font-size: 9px; font-style: italic;">No Photo</span>`;
+    let imgHtml = `<span style="color: #78716c; font-size: 9px; font-style: italic;">No Photo</span>`;
     if (item.img) {
-      imgHtml = `<img src="${item.img}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 4px; border: 1px solid #9e7b5c;">`;
+      imgHtml = `<img src="${item.img}" style="width: 48px; height: 48px; object-fit: cover; border-radius: 4px; border: 1px solid #9e7b5c;">`;
     }
 
     tr.innerHTML = `
