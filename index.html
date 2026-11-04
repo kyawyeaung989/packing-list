@@ -162,7 +162,7 @@
   <div style="display: flex; align-items: center; gap: 12px;">
     <div style="background-color: #b45309; color: white; padding: 4px 12px; border-radius: 8px; font-weight: 900; font-size: 18px;">PRO</div>
     <div>
-      <h1 style="color: #fbbf24; font-weight: 800; font-size: 16px;">PACKING LIST SYSTEM (CUSTOM SIZE + PERISTENT DB)</h1>
+      <h1 style="color: #fbbf24; font-weight: 800; font-size: 16px;">PACKING LIST SYSTEM (FIXED BUTTONS)</h1>
       <p style="font-size: 11px; color: #94a3b8;">AD DAFFODILS Consignment Logistics</p>
     </div>
   </div>
@@ -304,7 +304,7 @@ let items = [
   { desc: "Clothes, Books", kg: 18.35, l: 60, w: 50, h: 38, img: "" }
 ];
 
-const DB_NAME = 'ADDaffodilsPackingDB_CustomV1';
+const DB_NAME = 'ADDaffodilsPackingDB_CustomV2';
 const STORE_NAME = 'assets';
 
 function openDB() {
@@ -345,6 +345,24 @@ function setTodayDate() {
   const d = String(today.getDate()).padStart(2, '0');
   const m = String(today.getMonth() + 1).padStart(2, '0');
   document.getElementById('inputDate').value = `${d}.${m}.${today.getFullYear()}`;
+  updateInvoice();
+}
+
+function autoNextRefNo() {
+  const invInput = document.getElementById('inputInvNo');
+  let val = invInput.value.trim();
+  const match = val.match(/^(.*?)(?:\b|_|-)*(\d+)$/);
+  
+  if (match) {
+    const prefix = match[1];
+    const numStr = match[2];
+    const nextNum = parseInt(numStr, 10) + 1;
+    const paddedNum = String(nextNum).padStart(numStr.length, '0');
+    invInput.value = prefix + paddedNum;
+  } else {
+    invInput.value = val + '001';
+  }
+  updateInvoice();
 }
 
 function displayImageLogo(dataUrl) {
