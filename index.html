@@ -3,13 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>A3 PACKING LIST SYSTEM - AD DAFFODILS</title>
+  <title>A4 PACKING LIST SYSTEM - AD DAFFODILS</title>
   
-  <!-- html2pdf bundle for PDF export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <!-- html2canvas for JPG export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <!-- Google Inter Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <style>
@@ -23,7 +20,7 @@
     }
 
     .app-header {
-      max-width: 100%;
+      max-width: 1400px;
       margin: 0 auto 16px auto;
       background-color: #1e293b;
       padding: 16px;
@@ -34,19 +31,19 @@
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
     }
 
     .main-grid {
-      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
       display: grid;
       grid-template-columns: 1fr;
       gap: 24px;
     }
 
-    @media (min-width: 1200px) {
+    @media (min-width: 1024px) {
       .main-grid {
-        grid-template-columns: 420px 1fr;
+        grid-template-columns: 400px 1fr;
       }
     }
 
@@ -60,7 +57,6 @@
       gap: 16px;
       max-height: 88vh;
       overflow-y: auto;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
     }
 
     .card-box {
@@ -78,7 +74,6 @@
       font-weight: 700;
       color: #fbbf24;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -95,14 +90,10 @@
       font-size: 12px;
       color: #f8fafc;
       outline: none;
-      font-family: inherit;
-    }
-    input[type="text"]:focus, input[type="number"]:focus, select:focus {
-      border-color: #f59e0b;
     }
 
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 4px; }
+    .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; }
 
     .btn {
       border: none;
@@ -111,16 +102,11 @@
       font-size: 10px;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.2s;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
       color: white;
     }
-    .btn-green { background-color: #059669; } .btn-green:hover { background-color: #10b981; }
-    .btn-amber { background-color: #d97706; } .btn-amber:hover { background-color: #f59e0b; }
-    .btn-rose { background-color: #e11d48; }  .btn-rose:hover { background-color: #f43f5e; }
+    .btn-green { background-color: #059669; }
+    .btn-amber { background-color: #d97706; }
+    .btn-rose { background-color: #e11d48; }
     .btn-action { padding: 8px 16px; font-size: 12px; border-radius: 8px; }
 
     .preview-container {
@@ -131,19 +117,17 @@
       border-radius: 16px;
       border: 1px solid #334155;
       display: flex;
-      justify-content: flex-start;
-      align-items: flex-start;
+      justify-content: center;
     }
 
+    /* A4 PORTRAIT SHEET SPECIFICATIONS */
     .invoice-sheet {
       background-color: #ECE3D4;
       color: #3D2B1F;
-      width: 420mm;
+      width: 210mm;
       min-height: 297mm;
-      height: 297mm;
-      padding: 12mm 15mm;
+      padding: 12mm;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      position: relative;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -156,31 +140,19 @@
     .styled-text-logo {
       display: inline-flex;
       flex-direction: column;
-      align-items: flex-start;
-      justify-content: center;
       background: linear-gradient(135deg, #3d2b1f 0%, #1e130c 100%);
       border: 2px solid #d97706;
-      border-radius: 10px;
-      padding: 10px 18px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      border-radius: 8px;
+      padding: 6px 12px;
     }
 
     @media print {
       body { background: white !important; padding: 0 !important; }
       .no-print { display: none !important; }
-      .preview-container { padding: 0 !important; background: none !important; border: none !important; overflow: visible !important; }
-      .invoice-sheet {
-        box-shadow: none !important;
-        width: 420mm !important;
-        height: 297mm !important;
-        padding: 12mm 15mm !important;
-        margin: 0 !important;
-      }
+      .preview-container { padding: 0 !important; background: none !important; border: none !important; }
+      .invoice-sheet { box-shadow: none !important; width: 210mm !important; height: 297mm !important; margin: 0 !important; }
     }
 
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #1e293b; }
-    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
     .hidden { display: none !important; }
   </style>
 </head>
@@ -188,171 +160,140 @@
 
 <div class="app-header no-print">
   <div style="display: flex; align-items: center; gap: 12px;">
-    <div style="background-color: #b45309; color: white; padding: 4px 12px; border-radius: 8px; font-weight: 900; font-size: 20px;">A3</div>
+    <div style="background-color: #b45309; color: white; padding: 4px 12px; border-radius: 8px; font-weight: 900; font-size: 18px;">A4</div>
     <div>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <h1 style="color: #fbbf24; font-weight: 800; font-size: 18px; line-height: 1.2;">ADVANCED PACKING LIST SYSTEM</h1>
-        <span style="font-size: 10px; background-color: rgba(16, 185, 129, 0.2); color: #6ee7b7; font-weight: 700; padding: 2px 8px; border-radius: 9999px; border: 1px solid rgba(16, 185, 129, 0.3);">V14 Layout Perfected</span>
-      </div>
-      <p style="font-size: 12px; color: #94a3b8; margin-top: 2px;">AD DAFFODILS Consignment Logistics System</p>
+      <h1 style="color: #fbbf24; font-weight: 800; font-size: 16px;">PACKING LIST SYSTEM (A4 FORMAT)</h1>
+      <p style="font-size: 11px; color: #94a3b8;">AD DAFFODILS Consignment Logistics</p>
     </div>
   </div>
   
   <div style="display: flex; gap: 10px;">
     <button onclick="exportJPG()" class="btn btn-green btn-action">🖼 Export JPG</button>
-    <button onclick="exportPDF()" class="btn btn-rose btn-action">📄 Export PDF (A3)</button>
+    <button onclick="exportPDF()" class="btn btn-rose btn-action">📄 Export PDF (A4)</button>
   </div>
 </div>
 
 <div class="main-grid">
   <div class="control-panel no-print">
-    <div style="font-size: 16px; font-weight: 700; color: #f8fafc; border-bottom: 1px solid #334155; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
-      <span>⚙️ Control Panel</span>
-      <span style="font-size: 12px; color: #34d399;">Pro Mode</span>
-    </div>
+    <div style="font-size: 15px; font-weight: 700; border-bottom: 1px solid #334155; padding-bottom: 8px;">⚙️ Control Panel</div>
 
     <div class="card-box">
       <div class="section-title">
-        <span>1. Company Logo (Optional)</span>
-        <button id="resetLogoBtn" onclick="clearLogo()" class="btn btn-rose hidden">🗑️ Reset Logo</button>
+        <span>1. Company Logo</span>
+        <button id="resetLogoBtn" onclick="clearLogo()" class="btn btn-rose hidden">🗑️ Reset</button>
       </div>
       <input type="file" id="logoFileInput" accept="image/*" onchange="handleLogoUpload(event)" style="font-size: 11px;">
     </div>
 
-    <div class="card-box" style="border-color: rgba(245, 158, 11, 0.4);">
-      <div class="section-title">
-        <span>2. Volume Calculation Formula</span>
-        <span style="font-size: 10px; color: #34d399;">Divisor</span>
-      </div>
-      <div>
-        <label>Volumetric Divisor:</label>
-        <select id="inputDivisor" onchange="updateInvoiceOnly();" style="color: #fbbf24; font-weight: 700;">
-          <option value="5000">Divide by 5000 ( ÷ 5000 )</option>
-          <option value="6000">Divide by 6000 ( ÷ 6000 )</option>
-        </select>
-      </div>
+    <div class="card-box">
+      <div class="section-title">2. Volumetric Divisor</div>
+      <select id="inputDivisor" onchange="updateInvoiceOnly();">
+        <option value="5000">Divide by 5000 ( ÷ 5000 )</option>
+        <option value="6000">Divide by 6000 ( ÷ 6000 )</option>
+      </select>
     </div>
 
     <div class="card-box">
       <div class="section-title">
         <span>3. Packing Info</span>
-        <div style="display: flex; gap: 6px;">
-          <button onclick="setTodayDate()" class="btn btn-amber">📅 Today Date</button>
-          <button onclick="autoNextRefNo()" class="btn btn-green">+ Auto Ref No.</button>
+        <div style="display: flex; gap: 4px;">
+          <button onclick="setTodayDate()" class="btn btn-amber">📅 Date</button>
+          <button onclick="autoNextRefNo()" class="btn btn-green">+ Ref</button>
         </div>
       </div>
-
       <div class="grid-2">
-        <div>
-          <label>Date</label>
-          <input type="text" id="inputDate" value="" oninput="updateInvoiceOnly()">
-        </div>
-        <div>
-          <label>Ref / Inv No.</label>
-          <input type="text" id="inputInvNo" value="PL001" oninput="updateInvoiceOnly()" style="font-weight: 700;">
-        </div>
+        <input type="text" id="inputDate" value="" oninput="updateInvoiceOnly()">
+        <input type="text" id="inputInvNo" value="PL001" oninput="updateInvoiceOnly()">
       </div>
     </div>
 
     <div class="card-box">
       <div class="section-title">4. Shipper & Consignee</div>
-      <div style="display: flex; flex-direction: column; gap: 8px;">
-        <span style="font-size: 11px; font-weight: 600; color: #94a3b8;">Shipper</span>
-        <div class="grid-2">
-          <input type="text" id="inputSenderName" value="May Zon Moe" placeholder="Name" oninput="updateInvoiceOnly()">
-          <input type="text" id="inputSenderPhone" value="09777994663" placeholder="Tel" oninput="updateInvoiceOnly()">
-        </div>
+      <div class="grid-2">
+        <input type="text" id="inputSenderName" value="May Zon Moe" placeholder="Shipper Name" oninput="updateInvoiceOnly()">
+        <input type="text" id="inputSenderPhone" value="09777994663" placeholder="Shipper Tel" oninput="updateInvoiceOnly()">
       </div>
-
-      <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 4px;">
-        <span style="font-size: 11px; font-weight: 600; color: #94a3b8;">Consignee</span>
-        <div class="grid-2">
-          <input type="text" id="inputRecName" value="Ahmed Jarmal" placeholder="Name" oninput="updateInvoiceOnly()">
-          <input type="text" id="inputRecPhone" value="07894253729" placeholder="Tel" oninput="updateInvoiceOnly()">
-        </div>
+      <div class="grid-2">
+        <input type="text" id="inputRecName" value="Ahmed Jarmal" placeholder="Consignee Name" oninput="updateInvoiceOnly()">
+        <input type="text" id="inputRecPhone" value="07894253729" placeholder="Consignee Tel" oninput="updateInvoiceOnly()">
       </div>
     </div>
 
     <div class="card-box">
       <div class="section-title">
-        <span>5. Box Packing Items & Images</span>
+        <span>5. Items & Images</span>
         <button onclick="addItem()" class="btn btn-green">+ Add Box</button>
       </div>
-      <div id="itemInputsContainer" style="display: flex; flex-direction: column; gap: 10px;"></div>
+      <div id="itemInputsContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
     </div>
   </div>
 
   <div class="preview-container no-print">
-    <div id="invoiceContainer">
-      <div id="invoice" class="invoice-sheet">
-        <div>
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 16px; border-bottom: 1px solid rgba(120, 53, 15, 0.2);">
-            
-            <!-- LARGER CLEAR LOGO BLOCK -->
-            <div id="logoHeaderBlock" style="min-width: 220px; min-height: 75px; display: flex; align-items: center;">
-              <div id="imageLogoWrapper" class="hidden" style="width: 240px; height: 80px; overflow: hidden;">
-                <img id="viewLogoImg" src="" alt="AD DAFFODILS Logo" style="max-width: 100%; max-height: 100%; object-fit: contain;">
-              </div>
-              <div id="textLogoWrapper" class="styled-text-logo">
-                <div style="color: #fbbf24; font-weight: 900; font-size: 21px; letter-spacing: 0.05em; text-transform: uppercase; line-height: 1;">AD DAFFODILS</div>
-                <div style="color: #e2e8f0; font-weight: 700; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 5px;">CONSIGNMENT</div>
-              </div>
+    <div id="invoice" class="invoice-sheet">
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12px; border-bottom: 1px solid rgba(120, 53, 15, 0.2);">
+          <div id="logoHeaderBlock">
+            <div id="imageLogoWrapper" class="hidden" style="width: 160px; height: 50px;">
+              <img id="viewLogoImg" src="" style="max-width: 100%; max-height: 100%; object-fit: contain;">
             </div>
-
-            <div style="text-align: right; font-size: 11px; color: #451a03; font-weight: 500; display: flex; flex-direction: column; gap: 4px;">
-              <div style="font-weight: 700;">📞 09966322019, 09958337846</div>
-              <div style="max-w: 220px;">📍 No.49, Ground Floor, 93rd Street, Mingalar Taung Nyunt, Yangon.</div>
+            <div id="textLogoWrapper" class="styled-text-logo">
+              <div style="color: #fbbf24; font-weight: 900; font-size: 16px;">AD DAFFODILS</div>
+              <div style="color: #e2e8f0; font-weight: 700; font-size: 8px;">CONSIGNMENT</div>
             </div>
           </div>
 
-          <div style="text-align: center; margin: 16px 0;">
-            <h2 style="font-size: 26px; font-weight: 900; letter-spacing: 0.1em; color: #292524; text-transform: uppercase;">PACKING LIST</h2>
+          <div style="text-align: right; font-size: 10px; color: #451a03;">
+            <div style="font-weight: 700;">📞 09966322019, 09958337846</div>
+            <div style="max-width: 200px;">📍 No.49, Ground Floor, 93rd Street, Mingalar Taung Nyunt, Yangon.</div>
           </div>
-
-          <div class="theme-banner" style="border-radius: 2px; padding: 8px 16px; font-weight: 700; font-size: 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-            <div>DATE &nbsp;<span id="viewDate">04.11.2026</span></div>
-            <div>REF No. : &nbsp;<span id="viewInvNo">PL001</span></div>
-          </div>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 14px; font-size: 11px; font-weight: 600; color: #1c1917; padding: 0 4px;">
-            <div style="display: flex; flex-direction: column; gap: 4px;">
-              <div style="font-weight: 900; color: #44403c; text-transform: uppercase; font-size: 10px;">SHIPPER</div>
-              <div><span style="width: 45px; display: inline-block; color: #57534e;">Name :</span> <span id="viewSenderName" style="font-weight: 700;">May Zon Moe</span></div>
-              <div><span style="width: 45px; display: inline-block; color: #57534e;">Tel :</span> <span id="viewSenderPhone" style="font-weight: 700;">09777994663</span></div>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 4px; border-left: 2px solid rgba(120, 53, 15, 0.2); padding-left: 16px;">
-              <div style="font-weight: 900; color: #44403c; text-transform: uppercase; font-size: 10px;">CONSIGNEE</div>
-              <div><span style="width: 45px; display: inline-block; color: #57534e;">Name :</span> <span id="viewRecName" style="font-weight: 700;">Ahmed Jarmal</span></div>
-              <div><span style="width: 45px; display: inline-block; color: #57534e;">Tel :</span> <span id="viewRecPhone" style="font-weight: 700;">07894253729</span></div>
-            </div>
-          </div>
-
-          <div style="display: flex; justify-content: space-between; background-color: rgba(158, 123, 92, 0.2); border: 1px solid rgba(120, 53, 15, 0.3); padding: 6px 12px; font-weight: 800; font-size: 11px; color: #3d2b1f; margin-bottom: 14px; border-radius: 2px;">
-            <div>Total Boxes: <span id="viewTotalBoxes">0</span></div>
-            <div>Total Weight: <span id="viewTotalWeight">0.00</span> Kg</div>
-            <div>Total Vol: <span id="viewTotalCbm">0.00</span></div>
-          </div>
-
-          <!-- BALANCED TABLE: WIDER BOX IMAGE & COMPACT DESCRIPTION -->
-          <table style="width: 100%; table-layout: fixed; border-collapse: collapse; margin: 4px 0; font-size: 11px; text-align: left;">
-            <thead>
-              <tr class="table-header" style="font-size: 10px; text-transform: uppercase;">
-                <th style="padding: 10px 4px; font-weight: 700; border-radius: 2px 0 0 2px; width: 5%; text-align: center;">Box</th>
-                <th style="padding: 10px 8px; font-weight: 700; width: 22%; text-align: center;">Box Image</th>
-                <th style="padding: 10px 10px; font-weight: 700; width: 26%;">Description</th>
-                <th style="padding: 10px 8px; font-weight: 700; text-align: right; width: 10%;">Kg</th>
-                <th style="padding: 10px 8px; font-weight: 700; text-align: center; width: 15%;">Dimension (cm)</th>
-                <th style="padding: 10px 8px; font-weight: 700; text-align: right; width: 11%;">Volume</th>
-                <th style="padding: 10px 6px; font-weight: 700; border-radius: 0 2px 2px 0; width: 11%; text-align: center;">Remark</th>
-              </tr>
-            </thead>
-            <tbody id="viewTableBody"></tbody>
-          </table>
         </div>
 
-        <div class="theme-banner" style="text-align: center; padding: 8px; font-weight: 700; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; margin-top: auto; border-radius: 2px;">
-          REMAIN TRANQUIL WE PROCEED WITH UTMOST CAUTIONS
+        <div style="text-align: center; margin: 12px 0;">
+          <h2 style="font-size: 22px; font-weight: 900; color: #292524;">PACKING LIST</h2>
         </div>
+
+        <div class="theme-banner" style="padding: 6px 12px; font-weight: 700; font-size: 12px; display: flex; justify-content: space-between; margin-bottom: 10px;">
+          <div>DATE : &nbsp;<span id="viewDate">04.11.2026</span></div>
+          <div>REF No. : &nbsp;<span id="viewInvNo">PL001</span></div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 10px; font-size: 10px;">
+          <div>
+            <div style="font-weight: 900; color: #44403c;">SHIPPER</div>
+            <div>Name: <span id="viewSenderName" style="font-weight: 700;">May Zon Moe</span></div>
+            <div>Tel: <span id="viewSenderPhone" style="font-weight: 700;">09777994663</span></div>
+          </div>
+          <div style="border-left: 2px solid rgba(120, 53, 15, 0.2); padding-left: 10px;">
+            <div style="font-weight: 900; color: #44403c;">CONSIGNEE</div>
+            <div>Name: <span id="viewRecName" style="font-weight: 700;">Ahmed Jarmal</span></div>
+            <div>Tel: <span id="viewRecPhone" style="font-weight: 700;">07894253729</span></div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; background-color: rgba(158, 123, 92, 0.2); padding: 6px 10px; font-weight: 800; font-size: 10px; margin-bottom: 10px;">
+          <div>Total Boxes: <span id="viewTotalBoxes">0</span></div>
+          <div>Total Weight: <span id="viewTotalWeight">0.00</span> Kg</div>
+          <div>Total Vol: <span id="viewTotalCbm">0.00</span></div>
+        </div>
+
+        <!-- COMPACT & BALANCED A4 TABLE -->
+        <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+          <thead>
+            <tr class="table-header">
+              <th style="padding: 6px; width: 8%; text-align: center;">Box</th>
+              <th style="padding: 6px; width: 22%; text-align: center;">Image</th>
+              <th style="padding: 6px; width: 25%;">Description</th>
+              <th style="padding: 6px; width: 12%; text-align: right;">Kg</th>
+              <th style="padding: 6px; width: 18%; text-align: center;">Dim (cm)</th>
+              <th style="padding: 6px; width: 15%; text-align: right;">Vol</th>
+            </tr>
+          </thead>
+          <tbody id="viewTableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="theme-banner" style="text-align: center; padding: 6px; font-weight: 700; font-size: 9px; margin-top: auto;">
+        REMAIN TRANQUIL WE PROCEED WITH UTMOST CAUTIONS
       </div>
     </div>
   </div>
@@ -363,106 +304,47 @@ let items = [
   { desc: "Clothes, Books", kg: 18.35, l: 60, w: 50, h: 38, remark: "", img: "" }
 ];
 
-const DB_NAME = 'ADDaffodilsPackingDBV14';
-const DB_VERSION = 1;
+const DB_NAME = 'ADDaffodilsPackingDBA4';
 const STORE_NAME = 'assets';
 
 function openDB() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-    request.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME);
-    };
+  return new Promise((resolve) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onupgradeneeded = (e) => e.target.result.createObjectStore(STORE_NAME);
     request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
   });
 }
 
 async function saveToDB(key, value) {
-  try {
-    const db = await openDB();
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    tx.objectStore(STORE_NAME).put(value, key);
-  } catch (err) { console.error(err); }
+  const db = await openDB();
+  db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).put(value, key);
 }
 
 async function getFromDB(key) {
-  try {
-    const db = await openDB();
-    return new Promise((resolve) => {
-      const tx = db.transaction(STORE_NAME, 'readonly');
-      const req = tx.objectStore(STORE_NAME).get(key);
-      req.onsuccess = () => resolve(req.result || null);
-      req.onerror = () => resolve(null);
-    });
-  } catch (err) { return null; }
-}
-
-async function deleteFromDB(key) {
-  try {
-    const db = await openDB();
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    tx.objectStore(STORE_NAME).delete(key);
-  } catch (err) { console.error(err); }
+  const db = await openDB();
+  return new Promise((resolve) => {
+    const req = db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).get(key);
+    req.onsuccess = () => resolve(req.result || null);
+  });
 }
 
 async function init() {
-  await loadSavedLogo();
-  await loadSavedItems();
-  loadSavedRefNumber();
+  const savedLogo = await getFromDB('companyLogo');
+  if (savedLogo) displayImageLogo(savedLogo);
+  
+  const savedItems = await getFromDB('packing_items_list');
+  if (savedItems && savedItems.length > 0) items = savedItems;
+  
   setTodayDate();
   renderItemInputs();
   updateInvoice();
 }
 
-async function loadSavedItems() {
-  const savedItems = await getFromDB('packing_items_list');
-  if (savedItems && Array.isArray(savedItems) && savedItems.length > 0) {
-    items = savedItems;
-  }
-}
-
-async function saveItemsState() {
-  await saveToDB('packing_items_list', items);
-}
-
-function loadSavedRefNumber() {
-  const savedRef = localStorage.getItem('addaffodils_last_ref_v14');
-  if (savedRef) document.getElementById('inputInvNo').value = savedRef;
-}
-
-function autoNextRefNo() {
-  const invInput = document.getElementById('inputInvNo');
-  let val = invInput.value.trim();
-  const match = val.match(/^(.*?)(?:\b|_|-)*(\d+)$/);
-  
-  if (match) {
-    const prefix = match[1];
-    const numStr = match[2];
-    const nextNum = parseInt(numStr, 10) + 1;
-    const paddedNum = String(nextNum).padStart(numStr.length, '0');
-    invInput.value = prefix + paddedNum;
-  } else {
-    invInput.value = val + '001';
-  }
-  updateInvoice();
-}
-
 function setTodayDate() {
   const today = new Date();
-  const day = String(today.getDate()).padStart(2, '0');
-  const month = String(today.getMonth() + 1).padStart(2, '0');
-  const year = today.getFullYear();
-  
-  document.getElementById('inputDate').value = `${day}.${month}.${year}`;
-  updateInvoice();
-}
-
-async function loadSavedLogo() {
-  const savedLogo = await getFromDB('companyLogo');
-  if (savedLogo) displayImageLogo(savedLogo);
-  else displayTextLogo();
+  const d = String(today.getDate()).padStart(2, '0');
+  const m = String(today.getMonth() + 1).padStart(2, '0');
+  document.getElementById('inputDate').value = `${d}.${m}.${today.getFullYear()}`;
 }
 
 function displayImageLogo(dataUrl) {
@@ -476,25 +358,23 @@ function displayTextLogo() {
   document.getElementById('imageLogoWrapper').classList.add('hidden');
   document.getElementById('textLogoWrapper').classList.remove('hidden');
   document.getElementById('resetLogoBtn').classList.add('hidden');
-  const fileInput = document.getElementById('logoFileInput');
-  if (fileInput) fileInput.value = '';
 }
 
 async function handleLogoUpload(event) {
   const file = event.target.files[0];
   if (file) {
     const reader = new FileReader();
-    reader.onload = async function(e) {
-      const base64Image = e.target.result;
-      displayImageLogo(base64Image);
-      await saveToDB('companyLogo', base64Image);
+    reader.onload = async (e) => {
+      displayImageLogo(e.target.result);
+      await saveToDB('companyLogo', e.target.result);
     };
     reader.readAsDataURL(file);
   }
 }
 
 async function clearLogo() {
-  await deleteFromDB('companyLogo');
+  const db = await openDB();
+  db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).delete('companyLogo');
   displayTextLogo();
 }
 
@@ -502,9 +382,9 @@ async function handleBoxImageUpload(event, index) {
   const file = event.target.files[0];
   if (file) {
     const reader = new FileReader();
-    reader.onload = async function(e) {
+    reader.onload = async (e) => {
       items[index].img = e.target.result;
-      await saveItemsState();
+      await saveToDB('packing_items_list', items);
       renderItemInputs();
       updateInvoice();
     };
@@ -514,7 +394,7 @@ async function handleBoxImageUpload(event, index) {
 
 async function removeBoxImage(index) {
   items[index].img = "";
-  await saveItemsState();
+  await saveToDB('packing_items_list', items);
   renderItemInputs();
   updateInvoice();
 }
@@ -522,49 +402,22 @@ async function removeBoxImage(index) {
 function renderItemInputs() {
   const container = document.getElementById('itemInputsContainer');
   container.innerHTML = '';
-
   items.forEach((item, index) => {
     const div = document.createElement('div');
     div.className = 'card-box';
-    div.style.gap = '8px';
     div.innerHTML = `
-      <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+      <div style="display: flex; justify-content: space-between;">
         <span style="font-size: 11px; font-weight: bold; color: #fbbf24;">Box #${index + 1}</span>
-        <button onclick="removeItem(${index})" class="btn btn-rose" style="padding: 2px 8px;">✕</button>
+        <button onclick="removeItem(${index})" class="btn btn-rose">✕</button>
       </div>
-      <div>
-        <label>Box Photo / Image:</label>
-        <div style="display: flex; gap: 6px; align-items: center;">
-          <input type="file" accept="image/*" onchange="handleBoxImageUpload(event, ${index})" style="font-size: 10px; flex: 1;">
-          ${item.img ? `<button onclick="removeBoxImage(${index})" class="btn btn-rose" style="padding: 4px 8px; font-size: 9px;">Remove</button>` : ''}
-        </div>
-        ${item.img ? `<div style="margin-top: 4px;"><img src="${item.img}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px; border: 1px solid #f59e0b;"></div>` : ''}
-      </div>
-      <div>
-        <label>Description:</label>
-        <input type="text" id="desc_${index}" value="${item.desc}" oninput="items[${index}].desc = this.value; saveItemsState(); updateInvoice();" placeholder="Box items description">
-      </div>
+      <input type="file" accept="image/*" onchange="handleBoxImageUpload(event, ${index})" style="font-size: 10px;">
+      ${item.img ? `<img src="${item.img}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 4px;">` : ''}
+      <input type="text" value="${item.desc}" oninput="items[${index}].desc = this.value; saveToDB('packing_items_list', items); updateInvoice();" placeholder="Description">
       <div class="grid-4">
-        <div>
-          <label>Kg:</label>
-          <input type="number" step="0.01" id="kg_${index}" value="${item.kg}" oninput="items[${index}].kg = parseFloat(this.value)||0; saveItemsState(); updateInvoice();" style="text-align: center; font-weight: 700;">
-        </div>
-        <div>
-          <label>L (cm):</label>
-          <input type="number" step="1" id="l_${index}" value="${item.l}" oninput="items[${index}].l = parseFloat(this.value)||0; saveItemsState(); updateInvoice();" style="text-align: center;">
-        </div>
-        <div>
-          <label>W (cm):</label>
-          <input type="number" step="1" id="w_${index}" value="${item.w}" oninput="items[${index}].w = parseFloat(this.value)||0; saveItemsState(); updateInvoice();" style="text-align: center;">
-        </div>
-        <div>
-          <label>H (cm):</label>
-          <input type="number" step="1" id="h_${index}" value="${item.h}" oninput="items[${index}].h = parseFloat(this.value)||0; saveItemsState(); updateInvoice();" style="text-align: center;">
-        </div>
-      </div>
-      <div>
-        <label>Remark / Owner:</label>
-        <input type="text" id="remark_${index}" value="${item.remark || ''}" oninput="items[${index}].remark = this.value; saveItemsState(); updateInvoice();" placeholder="Optional remark">
+        <input type="number" step="0.01" value="${item.kg}" oninput="items[${index}].kg = parseFloat(this.value)||0; saveToDB('packing_items_list', items); updateInvoice();">
+        <input type="number" value="${item.l}" oninput="items[${index}].l = parseFloat(this.value)||0; updateInvoice();">
+        <input type="number" value="${item.w}" oninput="items[${index}].w = parseFloat(this.value)||0; updateInvoice();">
+        <input type="number" value="${item.h}" oninput="items[${index}].h = parseFloat(this.value)||0; updateInvoice();">
       </div>
     `;
     container.appendChild(div);
@@ -572,8 +425,8 @@ function renderItemInputs() {
 }
 
 async function addItem() {
-  items.push({ desc: "Clothes", kg: 10, l: 50, w: 40, h: 40, remark: "", img: "" });
-  await saveItemsState();
+  items.push({ desc: "Clothes", kg: 10, l: 50, w: 40, h: 40, img: "" });
+  await saveToDB('packing_items_list', items);
   renderItemInputs();
   updateInvoice();
 }
@@ -581,25 +434,18 @@ async function addItem() {
 async function removeItem(index) {
   if (items.length > 1) {
     items.splice(index, 1);
-    await saveItemsState();
+    await saveToDB('packing_items_list', items);
     renderItemInputs();
     updateInvoice();
   }
 }
 
-function updateInvoiceOnly() {
-  updateInvoice();
-}
+function updateInvoiceOnly() { updateInvoice(); }
 
 function updateInvoice() {
-  const currentInv = document.getElementById('inputInvNo').value;
-  localStorage.setItem('addaffodils_last_ref_v14', currentInv);
-
   const divisor = parseFloat(document.getElementById('inputDivisor').value) || 5000;
-
   document.getElementById('viewDate').innerText = document.getElementById('inputDate').value;
-  document.getElementById('viewInvNo').innerText = currentInv;
-
+  document.getElementById('viewInvNo').innerText = document.getElementById('inputInvNo').value;
   document.getElementById('viewSenderName').innerText = document.getElementById('inputSenderName').value;
   document.getElementById('viewSenderPhone').innerText = document.getElementById('inputSenderPhone').value;
   document.getElementById('viewRecName').innerText = document.getElementById('inputRecName').value;
@@ -607,65 +453,54 @@ function updateInvoice() {
 
   const tbody = document.getElementById('viewTableBody');
   tbody.innerHTML = '';
-
-  let totalWeight = 0;
-  let totalVol = 0;
+  let totalW = 0, totalV = 0;
 
   items.forEach((item, index) => {
-    totalWeight += item.kg;
+    totalW += item.kg;
     const vol = (item.l * item.w * item.h) / divisor;
-    totalVol += vol;
+    totalV += vol;
 
     const tr = document.createElement('tr');
     tr.style.borderBottom = '1px solid rgba(120, 53, 15, 0.15)';
-    tr.style.fontWeight = '600';
-    tr.style.color = '#1c1917';
 
-    let imgHtml = `<span style="color: #78716c; font-size: 10px; font-style: italic;">No Photo</span>`;
-    if (item.img) {
-      imgHtml = `<img src="${item.img}" style="width: 105px; height: 105px; object-fit: cover; border-radius: 6px; border: 1px solid #9e7b5c; box-shadow: 0 3px 6px rgba(0,0,0,0.15);">`;
-    }
+    const imgHtml = item.img 
+      ? `<img src="${item.img}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 4px;">`
+      : `<span style="color: #78716c; font-size: 9px;">No Photo</span>`;
 
     tr.innerHTML = `
-      <td style="padding: 12px 4px; text-align: center; font-weight: 800; vertical-align: middle;">${index + 1}</td>
-      <td style="padding: 12px 8px; text-align: center; vertical-align: middle;">${imgHtml}</td>
-      <td style="padding: 12px 10px; vertical-align: middle; word-break: break-word;">${item.desc}</td>
-      <td style="padding: 12px 8px; text-align: right; font-weight: 700; vertical-align: middle;">${item.kg.toFixed(2)}</td>
-      <td style="padding: 12px 8px; text-align: center; font-size: 10px; color: #57534e; vertical-align: middle;">${item.l} × ${item.w} × ${item.h}</td>
-      <td style="padding: 12px 8px; text-align: right; vertical-align: middle;">${vol.toFixed(2)}</td>
-      <td style="padding: 12px 6px; text-align: center; font-weight: 700; color: #92400e; vertical-align: middle;">${item.remark || ''}</td>
+      <td style="padding: 6px; text-align: center; font-weight: 800;">${index + 1}</td>
+      <td style="padding: 6px; text-align: center;">${imgHtml}</td>
+      <td style="padding: 6px;">${item.desc}</td>
+      <td style="padding: 6px; text-align: right; font-weight: 700;">${item.kg.toFixed(2)}</td>
+      <td style="padding: 6px; text-align: center; font-size: 9px;">${item.l}×${item.w}×${item.h}</td>
+      <td style="padding: 6px; text-align: right;">${vol.toFixed(2)}</td>
     `;
     tbody.appendChild(tr);
   });
 
   document.getElementById('viewTotalBoxes').innerText = items.length;
-  document.getElementById('viewTotalWeight').innerText = totalWeight.toFixed(2);
-  document.getElementById('viewTotalCbm').innerText = totalVol.toFixed(2);
+  document.getElementById('viewTotalWeight').innerText = totalW.toFixed(2);
+  document.getElementById('viewTotalCbm').innerText = totalV.toFixed(2);
 }
 
 function exportJPG() {
-  const invNo = document.getElementById('inputInvNo').value;
-  const invoice = document.getElementById('invoice');
-  
-  html2canvas(invoice, { scale: 3, useCORS: true, allowTaint: true }).then(canvas => {
-    const link = document.createElement('a');
-    link.download = `${invNo}_AD_Daffodils_PackingList_A3.jpg`;
-    link.href = canvas.toDataURL('image/jpeg', 1.0);
-    link.click();
+  html2canvas(document.getElementById('invoice'), { scale: 3 }).then(canvas => {
+    const a = document.createElement('a');
+    a.download = `${document.getElementById('inputInvNo').value}_A4_PackingList.jpg`;
+    a.href = canvas.toDataURL('image/jpeg', 1.0);
+    a.click();
   });
 }
 
 function exportPDF() {
-  const invNo = document.getElementById('inputInvNo').value;
-  const element = document.getElementById('invoice');
   const opt = {
     margin: 0,
-    filename: `${invNo}_AD_Daffodils_PackingList_A3.pdf`,
+    filename: `${document.getElementById('inputInvNo').value}_A4_PackingList.pdf`,
     image: { type: 'jpeg', quality: 1.0 },
-    html2canvas: { scale: 3, useCORS: true, allowTaint: true },
-    jsPDF: { unit: 'mm', format: 'a3', orientation: 'landscape' }
+    html2canvas: { scale: 3 },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
   };
-  html2pdf().set(opt).from(element).save();
+  html2pdf().set(opt).from(document.getElementById('invoice')).save();
 }
 
 window.onload = init;
