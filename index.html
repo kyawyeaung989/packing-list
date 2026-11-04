@@ -120,7 +120,6 @@
       justify-content: center;
     }
 
-    /* A4 PORTRAIT SHEET SPECIFICATIONS */
     .invoice-sheet {
       background-color: #ECE3D4;
       color: #3D2B1F;
@@ -276,16 +275,16 @@
           <div>Total Vol: <span id="viewTotalCbm">0.00</span></div>
         </div>
 
-        <!-- COMPACT & BALANCED A4 TABLE -->
-        <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+        <!-- PERFECT BALANCED A4 TABLE -->
+        <table style="width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 10px;">
           <thead>
             <tr class="table-header">
-              <th style="padding: 6px; width: 8%; text-align: center;">Box</th>
+              <th style="padding: 6px; width: 7%; text-align: center;">Box</th>
               <th style="padding: 6px; width: 22%; text-align: center;">Image</th>
-              <th style="padding: 6px; width: 25%;">Description</th>
+              <th style="padding: 6px; width: 31%;">Description</th>
               <th style="padding: 6px; width: 12%; text-align: right;">Kg</th>
-              <th style="padding: 6px; width: 18%; text-align: center;">Dim (cm)</th>
-              <th style="padding: 6px; width: 15%; text-align: right;">Vol</th>
+              <th style="padding: 6px; width: 16%; text-align: center;">Dim (cm)</th>
+              <th style="padding: 6px; width: 12%; text-align: right;">Vol</th>
             </tr>
           </thead>
           <tbody id="viewTableBody"></tbody>
@@ -301,10 +300,10 @@
 
 <script>
 let items = [
-  { desc: "Clothes, Books", kg: 18.35, l: 60, w: 50, h: 38, remark: "", img: "" }
+  { desc: "Clothes, Books", kg: 18.35, l: 60, w: 50, h: 38, img: "" }
 ];
 
-const DB_NAME = 'ADDaffodilsPackingDBA4';
+const DB_NAME = 'ADDaffodilsPackingDBA4V2';
 const STORE_NAME = 'assets';
 
 function openDB() {
@@ -406,18 +405,39 @@ function renderItemInputs() {
     const div = document.createElement('div');
     div.className = 'card-box';
     div.innerHTML = `
-      <div style="display: flex; justify-content: space-between;">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
         <span style="font-size: 11px; font-weight: bold; color: #fbbf24;">Box #${index + 1}</span>
         <button onclick="removeItem(${index})" class="btn btn-rose">✕</button>
       </div>
-      <input type="file" accept="image/*" onchange="handleBoxImageUpload(event, ${index})" style="font-size: 10px;">
-      ${item.img ? `<img src="${item.img}" style="width: 45px; height: 45px; object-fit: cover; border-radius: 4px;">` : ''}
-      <input type="text" value="${item.desc}" oninput="items[${index}].desc = this.value; saveToDB('packing_items_list', items); updateInvoice();" placeholder="Description">
+      <div>
+        <label>Box Photo / Image:</label>
+        <div style="display: flex; gap: 6px; align-items: center;">
+          <input type="file" accept="image/*" onchange="handleBoxImageUpload(event, ${index})" style="font-size: 10px; flex: 1;">
+          ${item.img ? `<button onclick="removeBoxImage(${index})" class="btn btn-rose" style="padding: 4px 8px; font-size: 9px;">Remove Photo</button>` : ''}
+        </div>
+        ${item.img ? `<div style="margin-top: 4px;"><img src="${item.img}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;"></div>` : ''}
+      </div>
+      <div>
+        <label>Description:</label>
+        <input type="text" value="${item.desc}" oninput="items[${index}].desc = this.value; saveToDB('packing_items_list', items); updateInvoice();" placeholder="Description">
+      </div>
       <div class="grid-4">
-        <input type="number" step="0.01" value="${item.kg}" oninput="items[${index}].kg = parseFloat(this.value)||0; saveToDB('packing_items_list', items); updateInvoice();">
-        <input type="number" value="${item.l}" oninput="items[${index}].l = parseFloat(this.value)||0; updateInvoice();">
-        <input type="number" value="${item.w}" oninput="items[${index}].w = parseFloat(this.value)||0; updateInvoice();">
-        <input type="number" value="${item.h}" oninput="items[${index}].h = parseFloat(this.value)||0; updateInvoice();">
+        <div>
+          <label>Kg:</label>
+          <input type="number" step="0.01" value="${item.kg}" oninput="items[${index}].kg = parseFloat(this.value)||0; saveToDB('packing_items_list', items); updateInvoice();" style="text-align: center;">
+        </div>
+        <div>
+          <label>L:</label>
+          <input type="number" value="${item.l}" oninput="items[${index}].l = parseFloat(this.value)||0; saveToDB('packing_items_list', items); updateInvoice();" style="text-align: center;">
+        </div>
+        <div>
+          <label>W:</label>
+          <input type="number" value="${item.w}" oninput="items[${index}].w = parseFloat(this.value)||0; saveToDB('packing_items_list', items); updateInvoice();" style="text-align: center;">
+        </div>
+        <div>
+          <label>H:</label>
+          <input type="number" value="${item.h}" oninput="items[${index}].h = parseFloat(this.value)||0; saveToDB('packing_items_list', items); updateInvoice();" style="text-align: center;">
+        </div>
       </div>
     `;
     container.appendChild(div);
@@ -464,16 +484,16 @@ function updateInvoice() {
     tr.style.borderBottom = '1px solid rgba(120, 53, 15, 0.15)';
 
     const imgHtml = item.img 
-      ? `<img src="${item.img}" style="width: 55px; height: 55px; object-fit: cover; border-radius: 4px;">`
+      ? `<img src="${item.img}" style="width: 65px; height: 65px; object-fit: cover; border-radius: 4px; border: 1px solid #9e7b5c;">`
       : `<span style="color: #78716c; font-size: 9px;">No Photo</span>`;
 
     tr.innerHTML = `
-      <td style="padding: 6px; text-align: center; font-weight: 800;">${index + 1}</td>
-      <td style="padding: 6px; text-align: center;">${imgHtml}</td>
-      <td style="padding: 6px;">${item.desc}</td>
-      <td style="padding: 6px; text-align: right; font-weight: 700;">${item.kg.toFixed(2)}</td>
-      <td style="padding: 6px; text-align: center; font-size: 9px;">${item.l}×${item.w}×${item.h}</td>
-      <td style="padding: 6px; text-align: right;">${vol.toFixed(2)}</td>
+      <td style="padding: 8px 4px; text-align: center; font-weight: 800; vertical-align: middle;">${index + 1}</td>
+      <td style="padding: 8px 6px; text-align: center; vertical-align: middle;">${imgHtml}</td>
+      <td style="padding: 8px 8px; vertical-align: middle; word-break: break-word;">${item.desc}</td>
+      <td style="padding: 8px 6px; text-align: right; font-weight: 700; vertical-align: middle;">${item.kg.toFixed(2)}</td>
+      <td style="padding: 8px 6px; text-align: center; font-size: 9px; vertical-align: middle;">${item.l}×${item.w}×${item.h}</td>
+      <td style="padding: 8px 6px; text-align: right; vertical-align: middle;">${vol.toFixed(2)}</td>
     `;
     tbody.appendChild(tr);
   });
