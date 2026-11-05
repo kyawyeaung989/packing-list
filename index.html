@@ -120,7 +120,6 @@
       justify-content: center;
     }
 
-    /* CUSTOM INTERMEDIATE SIZE SHEET (270mm x 297mm) */
     .invoice-sheet {
       background-color: #ECE3D4;
       color: #3D2B1F;
@@ -167,7 +166,7 @@
   <div style="display: flex; align-items: center; gap: 12px;">
     <div style="background-color: #b45309; color: white; padding: 4px 12px; border-radius: 8px; font-weight: 900; font-size: 18px;">PRO</div>
     <div>
-      <h1 style="color: #fbbf24; font-weight: 800; font-size: 16px;">PACKING LIST SYSTEM (COLUMN WIDTHS FIXED)</h1>
+      <h1 style="color: #fbbf24; font-weight: 800; font-size: 16px;">PACKING LIST SYSTEM (STABLE DB)</h1>
       <p style="font-size: 11px; color: #94a3b8;">AD DAFFODILS Consignment Logistics</p>
     </div>
   </div>
@@ -192,7 +191,7 @@
 
     <div class="card-box">
       <div class="section-title">2. Volumetric Divisor</div>
-      <select id="inputDivisor" onchange="updateInvoiceOnly();">
+      <select id="inputDivisor" onchange="saveAllData();">
         <option value="5000">Divide by 5000 ( ÷ 5000 )</option>
         <option value="6000">Divide by 6000 ( ÷ 6000 )</option>
       </select>
@@ -207,20 +206,20 @@
         </div>
       </div>
       <div class="grid-2">
-        <input type="text" id="inputDate" value="" oninput="updateInvoiceOnly()">
-        <input type="text" id="inputInvNo" value="PL001" oninput="updateInvoiceOnly()">
+        <input type="text" id="inputDate" value="" oninput="saveAllData()">
+        <input type="text" id="inputInvNo" value="PL001" oninput="saveAllData()">
       </div>
     </div>
 
     <div class="card-box">
       <div class="section-title">4. Shipper & Consignee</div>
       <div class="grid-2">
-        <input type="text" id="inputSenderName" value="May Zon Moe" placeholder="Shipper Name" oninput="updateInvoiceOnly()">
-        <input type="text" id="inputSenderPhone" value="09777994663" placeholder="Shipper Tel" oninput="updateInvoiceOnly()">
+        <input type="text" id="inputSenderName" value="May Zon Moe" placeholder="Shipper Name" oninput="saveAllData()">
+        <input type="text" id="inputSenderPhone" value="09777994663" placeholder="Shipper Tel" oninput="saveAllData()">
       </div>
       <div class="grid-2">
-        <input type="text" id="inputRecName" value="Ahmed Jarmal" placeholder="Consignee Name" oninput="updateInvoiceOnly()">
-        <input type="text" id="inputRecPhone" value="07894253729" placeholder="Consignee Tel" oninput="updateInvoiceOnly()">
+        <input type="text" id="inputRecName" value="Ahmed Jarmal" placeholder="Consignee Name" oninput="saveAllData()">
+        <input type="text" id="inputRecPhone" value="07894253729" placeholder="Consignee Tel" oninput="saveAllData()">
       </div>
     </div>
 
@@ -281,7 +280,6 @@
           <div>Total Vol: <span id="viewTotalCbm">0.00</span></div>
         </div>
 
-        <!-- PERFECT BALANCED TABLE WITH PROPORTIONAL WIDTHS -->
         <table style="width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 11px;">
           <thead>
             <tr class="table-header">
@@ -309,40 +307,82 @@
 let items = [
   { desc: "Clothes, Books", kg: 18.35, l: 60, w: 50, h: 38, remark: "", img: "" }
 ];
+let logoDataUrl = "";
 
-const DB_NAME = 'ADDaffodilsPackingDB_CustomV5';
-const STORE_NAME = 'assets';
+const DB_NAME = 'ADDaffodils_MasterDB';
+const STORE_NAME = 'packing_store';
 
 function openDB() {
   return new Promise((resolve) => {
     const request = indexedDB.open(DB_NAME, 1);
-    request.onupgradeneeded = (e) => e.target.result.createObjectStore(STORE_NAME);
+    request.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
     request.onsuccess = () => resolve(request.result);
+    request.onerror = () => resolve(null);
   });
 }
 
 async function saveToDB(key, value) {
   const db = await openDB();
-  db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).put(value, key);
+  if (!db) return;
+  return new Promise((resolve) => {
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    tx.objectStore(STORE_NAME).put(value, key);
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => resolve(false);
+  });
 }
 
 async function getFromDB(key) {
   const db = await openDB();
+  if (!db) return null;
   return new Promise((resolve) => {
-    const req = db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).get(key);
-    req.onsuccess = () => resolve(req.result || null);
+    const tx = db.transaction(STORE_NAME, 'readonly');
+    const req = tx.objectStore(STORE_NAME).get(key);
+    req.onsuccess = () => resolve(req.result !== undefined ? req.result : null);
+    req.onerror = () => resolve(null);
   });
 }
 
 async function init() {
-  const savedLogo = await getFromDB('companyLogo');
-  if (savedLogo) displayImageLogo(savedLogo);
-  
-  const savedItems = await getFromDB('packing_items_list');
-  if (savedItems && savedItems.length > 0) items = savedItems;
-  
-  setTodayDate();
+  const savedData = await getFromDB('app_state');
+  if (savedData) {
+    if (savedData.invNo) document.getElementById('inputInvNo').value = savedData.invNo;
+    if (savedData.date) document.getElementById('inputDate').value = savedData.date;
+    if (savedData.divisor) document.getElementById('inputDivisor').value = savedData.divisor;
+    if (savedData.senderName) document.getElementById('inputSenderName').value = savedData.senderName;
+    if (savedData.senderPhone) document.getElementById('inputSenderPhone').value = savedData.senderPhone;
+    if (savedData.recName) document.getElementById('inputRecName').value = savedData.recName;
+    if (savedData.recPhone) document.getElementById('inputRecPhone').value = savedData.recPhone;
+    if (savedData.items && Array.isArray(savedData.items)) items = savedData.items;
+    if (savedData.logo) {
+      logoDataUrl = savedData.logo;
+      displayImageLogo(logoDataUrl);
+    }
+  } else {
+    setTodayDate();
+  }
   renderItemInputs();
+  updateInvoice();
+}
+
+async function saveAllData() {
+  const state = {
+    invNo: document.getElementById('inputInvNo').value,
+    date: document.getElementById('inputDate').value,
+    divisor: document.getElementById('inputDivisor').value,
+    senderName: document.getElementById('inputSenderName').value,
+    senderPhone: document.getElementById('inputSenderPhone').value,
+    recName: document.getElementById('inputRecName').value,
+    recPhone: document.getElementById('inputRecPhone').value,
+    items: items,
+    logo: logoDataUrl
+  };
+  await saveToDB('app_state', state);
   updateInvoice();
 }
 
@@ -351,7 +391,7 @@ function setTodayDate() {
   const d = String(today.getDate()).padStart(2, '0');
   const m = String(today.getMonth() + 1).padStart(2, '0');
   document.getElementById('inputDate').value = `${d}.${m}.${today.getFullYear()}`;
-  updateInvoice();
+  saveAllData();
 }
 
 function autoNextRefNo() {
@@ -368,7 +408,7 @@ function autoNextRefNo() {
   } else {
     invInput.value = val + '001';
   }
-  updateInvoice();
+  saveAllData();
 }
 
 function displayImageLogo(dataUrl) {
@@ -382,6 +422,7 @@ function displayTextLogo() {
   document.getElementById('imageLogoWrapper').classList.add('hidden');
   document.getElementById('textLogoWrapper').classList.remove('hidden');
   document.getElementById('resetLogoBtn').classList.add('hidden');
+  logoDataUrl = "";
 }
 
 async function handleLogoUpload(event) {
@@ -389,17 +430,17 @@ async function handleLogoUpload(event) {
   if (file) {
     const reader = new FileReader();
     reader.onload = async (e) => {
-      displayImageLogo(e.target.result);
-      await saveToDB('companyLogo', e.target.result);
+      logoDataUrl = e.target.result;
+      displayImageLogo(logoDataUrl);
+      await saveAllData();
     };
     reader.readAsDataURL(file);
   }
 }
 
 async function clearLogo() {
-  const db = await openDB();
-  db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).delete('companyLogo');
   displayTextLogo();
+  await saveAllData();
 }
 
 async function handleBoxImageUpload(event, index) {
@@ -408,9 +449,8 @@ async function handleBoxImageUpload(event, index) {
     const reader = new FileReader();
     reader.onload = async (e) => {
       items[index].img = e.target.result;
-      await saveToDB('packing_items_list', items);
       renderItemInputs();
-      updateInvoice();
+      await saveAllData();
     };
     reader.readAsDataURL(file);
   }
@@ -418,9 +458,8 @@ async function handleBoxImageUpload(event, index) {
 
 async function removeBoxImage(index) {
   items[index].img = "";
-  await saveToDB('packing_items_list', items);
   renderItemInputs();
-  updateInvoice();
+  await saveAllData();
 }
 
 function renderItemInputs() {
@@ -444,29 +483,29 @@ function renderItemInputs() {
       </div>
       <div>
         <label>Description:</label>
-        <input type="text" value="${item.desc}" oninput="items[${index}].desc = this.value; saveToDB('packing_items_list', items); updateInvoice();" placeholder="Description">
+        <input type="text" value="${item.desc || ''}" oninput="items[${index}].desc = this.value; saveAllData();" placeholder="Description">
       </div>
       <div class="grid-4">
         <div>
           <label>Kg:</label>
-          <input type="number" step="0.01" value="${item.kg}" oninput="items[${index}].kg = parseFloat(this.value)||0; saveToDB('packing_items_list', items); updateInvoice();" style="text-align: center;">
+          <input type="number" step="0.01" value="${item.kg}" oninput="items[${index}].kg = parseFloat(this.value)||0; saveAllData();" style="text-align: center;">
         </div>
         <div>
           <label>L:</label>
-          <input type="number" value="${item.l}" oninput="items[${index}].l = parseFloat(this.value)||0; saveToDB('packing_items_list', items); updateInvoice();" style="text-align: center;">
+          <input type="number" value="${item.l}" oninput="items[${index}].l = parseFloat(this.value)||0; saveAllData();" style="text-align: center;">
         </div>
         <div>
           <label>W:</label>
-          <input type="number" value="${item.w}" oninput="items[${index}].w = parseFloat(this.value)||0; saveToDB('packing_items_list', items); updateInvoice();" style="text-align: center;">
+          <input type="number" value="${item.w}" oninput="items[${index}].w = parseFloat(this.value)||0; saveAllData();" style="text-align: center;">
         </div>
         <div>
           <label>H:</label>
-          <input type="number" value="${item.h}" oninput="items[${index}].h = parseFloat(this.value)||0; saveToDB('packing_items_list', items); updateInvoice();" style="text-align: center;">
+          <input type="number" value="${item.h}" oninput="items[${index}].h = parseFloat(this.value)||0; saveAllData();" style="text-align: center;">
         </div>
       </div>
       <div>
         <label>Remark / Owner:</label>
-        <input type="text" value="${item.remark || ''}" oninput="items[${index}].remark = this.value; saveToDB('packing_items_list', items); updateInvoice();" placeholder="Optional remark">
+        <input type="text" value="${item.remark || ''}" oninput="items[${index}].remark = this.value; saveAllData();" placeholder="Optional remark">
       </div>
     `;
     container.appendChild(div);
@@ -475,21 +514,17 @@ function renderItemInputs() {
 
 async function addItem() {
   items.push({ desc: "Clothes", kg: 10, l: 50, w: 40, h: 40, remark: "", img: "" });
-  await saveToDB('packing_items_list', items);
   renderItemInputs();
-  updateInvoice();
+  await saveAllData();
 }
 
 async function removeItem(index) {
   if (items.length > 1) {
     items.splice(index, 1);
-    await saveToDB('packing_items_list', items);
     renderItemInputs();
-    updateInvoice();
+    await saveAllData();
   }
 }
-
-function updateInvoiceOnly() { updateInvoice(); }
 
 function updateInvoice() {
   const divisor = parseFloat(document.getElementById('inputDivisor').value) || 5000;
@@ -519,7 +554,7 @@ function updateInvoice() {
     tr.innerHTML = `
       <td style="padding: 10px 4px; text-align: center; font-weight: 800; vertical-align: middle;">${index + 1}</td>
       <td style="padding: 10px 6px; text-align: center; vertical-align: middle;">${imgHtml}</td>
-      <td style="padding: 10px 8px; vertical-align: middle; word-break: break-word;">${item.desc}</td>
+      <td style="padding: 10px 8px; vertical-align: middle; word-break: break-word;">${item.desc || ''}</td>
       <td style="padding: 10px 6px; text-align: right; font-weight: 700; vertical-align: middle;">${item.kg.toFixed(2)}</td>
       <td style="padding: 10px 6px; text-align: center; font-size: 10px; vertical-align: middle;">${item.l}×${item.w}×${item.h}</td>
       <td style="padding: 10px 6px; text-align: right; vertical-align: middle;">${vol.toFixed(2)}</td>
@@ -534,7 +569,7 @@ function updateInvoice() {
 }
 
 function exportJPG() {
-  html2canvas(document.getElementById('invoice'), { scale: 3 }).then(canvas => {
+  html2canvas(document.getElementById('invoice'), { scale: 3, useCORS: true }).then(canvas => {
     const a = document.createElement('a');
     a.download = `${document.getElementById('inputInvNo').value}_Custom_PackingList.jpg`;
     a.href = canvas.toDataURL('image/jpeg', 1.0);
