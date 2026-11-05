@@ -117,13 +117,15 @@
       border-radius: 16px;
       border: 1px solid #334155;
       display: flex;
-      justify-content: center;
+      justify-content: flex-start;
     }
 
+    /* CUSTOM INTERMEDIATE SIZE SHEET (270mm x 297mm) WITH EXPLICIT MIN-WIDTH TO PREVENT CLIPPING */
     .invoice-sheet {
       background-color: #ECE3D4;
       color: #3D2B1F;
       width: 270mm;
+      min-width: 270mm;
       min-height: 297mm;
       padding: 12mm 15mm;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -153,8 +155,8 @@
     @media print {
       body { background: white !important; padding: 0 !important; }
       .no-print { display: none !important; }
-      .preview-container { padding: 0 !important; background: none !important; border: none !important; }
-      .invoice-sheet { box-shadow: none !important; width: 270mm !important; margin: 0 !important; }
+      .preview-container { padding: 0 !important; background: none !important; border: none !important; overflow: visible !important; }
+      .invoice-sheet { box-shadow: none !important; width: 270mm !important; min-width: 270mm !important; margin: 0 !important; }
     }
 
     .hidden { display: none !important; }
@@ -166,7 +168,7 @@
   <div style="display: flex; align-items: center; gap: 12px;">
     <div style="background-color: #b45309; color: white; padding: 4px 12px; border-radius: 8px; font-weight: 900; font-size: 18px;">PRO</div>
     <div>
-      <h1 style="color: #fbbf24; font-weight: 800; font-size: 16px;">PACKING LIST SYSTEM (STABLE DB)</h1>
+      <h1 style="color: #fbbf24; font-weight: 800; font-size: 16px;">PACKING LIST SYSTEM (CLIPPING FIXED)</h1>
       <p style="font-size: 11px; color: #94a3b8;">AD DAFFODILS Consignment Logistics</p>
     </div>
   </div>
@@ -257,7 +259,7 @@
         </div>
 
         <div class="theme-banner" style="padding: 6px 14px; font-weight: 700; font-size: 12px; display: flex; justify-content: space-between; margin-bottom: 12px;">
-          <div>DATE : &nbsp;<span id="viewDate">04.11.2026</span></div>
+          <div>DATE : &nbsp;<span id="viewDate">05.11.2026</span></div>
           <div>REF No. : &nbsp;<span id="viewInvNo">PL001</span></div>
         </div>
 
