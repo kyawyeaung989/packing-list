@@ -120,7 +120,7 @@
       justify-content: center;
     }
 
-    /* CUSTOM INTERMEDIATE SIZE SHEET (270mm x 297mm) */
+    /* CUSTOM INTERMEDIATE SIZE SHEET (270mm) - Height auto for multi-page support */
     .invoice-sheet {
       background-color: #ECE3D4;
       color: #3D2B1F;
@@ -132,6 +132,12 @@
       flex-direction: column;
       justify-content: space-between;
       flex-shrink: 0;
+    }
+
+    /* Prevent rows from splitting across pages */
+    tr {
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
 
     .theme-banner { background-color: #9E7B5C; color: #FFFFFF; }
@@ -150,7 +156,7 @@
       body { background: white !important; padding: 0 !important; }
       .no-print { display: none !important; }
       .preview-container { padding: 0 !important; background: none !important; border: none !important; }
-      .invoice-sheet { box-shadow: none !important; width: 270mm !important; height: 297mm !important; margin: 0 !important; }
+      .invoice-sheet { box-shadow: none !important; width: 270mm !important; margin: 0 !important; }
     }
 
     .hidden { display: none !important; }
@@ -162,7 +168,7 @@
   <div style="display: flex; align-items: center; gap: 12px;">
     <div style="background-color: #b45309; color: white; padding: 4px 12px; border-radius: 8px; font-weight: 900; font-size: 18px;">PRO</div>
     <div>
-      <h1 style="color: #fbbf24; font-weight: 800; font-size: 16px;">PACKING LIST SYSTEM (REMARK COLUMN ADDED)</h1>
+      <h1 style="color: #fbbf24; font-weight: 800; font-size: 16px;">PACKING LIST SYSTEM (MULTI-PAGE FIXED)</h1>
       <p style="font-size: 11px; color: #94a3b8;">AD DAFFODILS Consignment Logistics</p>
     </div>
   </div>
@@ -276,7 +282,7 @@
           <div>Total Vol: <span id="viewTotalCbm">0.00</span></div>
         </div>
 
-        <!-- TABLE WITH REMARK COLUMN -->
+        <!-- TABLE WITH PAGE BREAK FIX -->
         <table style="width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 11px;">
           <thead>
             <tr class="table-header">
@@ -293,7 +299,7 @@
         </table>
       </div>
 
-      <div class="theme-banner" style="text-align: center; padding: 7px; font-weight: 700; font-size: 10px; margin-top: auto;">
+      <div class="theme-banner" style="text-align: center; padding: 7px; font-weight: 700; font-size: 10px; margin-top: 20px;">
         REMAIN TRANQUIL WE PROCEED WITH UTMOST CAUTIONS
       </div>
     </div>
@@ -305,7 +311,7 @@ let items = [
   { desc: "Clothes, Books", kg: 18.35, l: 60, w: 50, h: 38, remark: "", img: "" }
 ];
 
-const DB_NAME = 'ADDaffodilsPackingDB_CustomV3';
+const DB_NAME = 'ADDaffodilsPackingDB_CustomV4';
 const STORE_NAME = 'assets';
 
 function openDB() {
@@ -539,10 +545,10 @@ function exportJPG() {
 
 function exportPDF() {
   const opt = {
-    margin: 0,
+    margin: [10, 10, 10, 10],
     filename: `${document.getElementById('inputInvNo').value}_Custom_PackingList.pdf`,
     image: { type: 'jpeg', quality: 1.0 },
-    html2canvas: { scale: 3 },
+    html2canvas: { scale: 3, useCORS: true },
     jsPDF: { unit: 'mm', format: [270, 297], orientation: 'portrait' }
   };
   html2pdf().set(opt).from(document.getElementById('invoice')).save();
