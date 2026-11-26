@@ -101,7 +101,7 @@
     .btn {
       border: none;
       border-radius: 6px;
-      padding: 4px 10px;
+      padding: 4px 8px;
       font-size: 10px;
       font-weight: 700;
       cursor: pointer;
@@ -115,6 +115,7 @@
     .btn-rose { background-color: #e11d48; }
     .btn-blue { background-color: #2563eb; }
     .btn-slate { background-color: #475569; }
+    .btn-teal { background-color: #0d9488; }
     .btn-action { padding: 8px 16px; font-size: 12px; border-radius: 8px; }
 
     .preview-container {
@@ -958,6 +959,24 @@ async function moveItemDown(index) {
   await saveAllData();
 }
 
+// ကြားညှပ်ထည့်ရန် (ဥပမာ Box #15 နဲ့ #16 ကြားမှာ Box အသစ် ထည့်ရန်)
+async function insertItemBelow(index) {
+  const currentBoxNo = String(items[index]?.boxNo || (index + 1)).trim();
+  const suggestedNo = /^\d+$/.test(currentBoxNo) ? `${currentBoxNo}A` : String(items.length + 1);
+  items.splice(index + 1, 0, {
+    boxNo: suggestedNo,
+    name: "",
+    desc: "Cargo Items",
+    kg: 0,
+    l: 0,
+    w: 0,
+    h: 0,
+    img: ""
+  });
+  renderItemInputs();
+  await saveAllData();
+}
+
 function renderItemInputs() {
   const container = document.getElementById('itemInputsContainer');
   container.innerHTML = '';
@@ -971,12 +990,13 @@ function renderItemInputs() {
     if (!item.l || !item.w || !item.h) warnings.push("⚠️ Missing Dimensions (L×W×H)");
 
     div.innerHTML = `
-      <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px;">
-        <div style="display: flex; align-items: center; gap: 6px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 4px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 5px;">
           <span style="font-size: 11px; font-weight: bold; color: #fbbf24; white-space: nowrap;">Box #:</span>
-          <input type="text" id="boxNo_${index}" style="width: 72px; padding: 4px 6px; font-size: 11px; font-weight: 700; color: #fbbf24; text-align: center;" title="Edit Box Number manually (e.g. 33 or 33A)">
+          <input type="text" id="boxNo_${index}" style="width: 64px; padding: 4px 6px; font-size: 11px; font-weight: 700; color: #fbbf24; text-align: center;" title="Edit Box Number manually (e.g. 33 or 15A)">
         </div>
-        <div style="display: flex; gap: 4px;">
+        <div style="display: flex; gap: 3px; flex-wrap: wrap;">
+          <button onclick="insertItemBelow(${index})" class="btn btn-teal" title="Insert New Box Below">↳ Insert</button>
           <button onclick="moveItemUp(${index})" class="btn btn-slate" ${index === 0 ? 'disabled' : ''} title="Move Up">↑</button>
           <button onclick="moveItemDown(${index})" class="btn btn-slate" ${index === items.length - 1 ? 'disabled' : ''} title="Move Down">↓</button>
           <button onclick="duplicateItem(${index})" class="btn btn-blue" title="Duplicate Box">+ Copy</button>
