@@ -43,7 +43,7 @@
 
     @media (min-width: 1024px) {
       .main-grid {
-        grid-template-columns: 430px 1fr;
+        grid-template-columns: 420px minmax(0, 1fr);
       }
     }
 
@@ -119,12 +119,12 @@
 
     .preview-container {
       width: 100%;
+      min-width: 0;
       background-color: #020617;
       padding: 20px;
       border-radius: 16px;
       border: 1px solid #334155;
-      display: flex;
-      justify-content: center;
+      display: block;
       overflow-x: auto;
     }
 
@@ -132,14 +132,18 @@
       background-color: #ECE3D4;
       color: #3D2B1F;
       width: 100%;
-      max-width: 980px;
+      min-width: 760px;
+      max-width: 960px;
+      margin: 0 auto;
       min-height: 297mm;
-      padding: 15mm 15mm;
+      height: auto;
+      padding: 14mm 14mm;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       box-sizing: border-box;
+      overflow: visible;
     }
 
     thead { display: table-header-group; }
@@ -166,7 +170,6 @@
       padding: 8px 14px;
     }
 
-    /* Lightbox Modal */
     .lightbox-overlay {
       position: fixed;
       inset: 0;
@@ -195,7 +198,6 @@
       justify-content: center;
     }
 
-    /* History Drawer / Box */
     .history-item {
       display: flex;
       justify-content: space-between;
@@ -211,8 +213,8 @@
     @media print {
       body { background: white !important; padding: 0 !important; }
       .no-print, .lightbox-overlay { display: none !important; }
-      .preview-container { padding: 0 !important; background: none !important; border: none !important; }
-      .invoice-sheet { box-shadow: none !important; width: 100% !important; max-width: none !important; margin: 0 !important; padding: 10mm !important; }
+      .preview-container { padding: 0 !important; background: none !important; border: none !important; overflow: visible !important; }
+      .invoice-sheet { box-shadow: none !important; width: 100% !important; min-width: 0 !important; max-width: none !important; margin: 0 !important; padding: 10mm !important; }
     }
 
     .hidden { display: none !important; }
@@ -248,7 +250,7 @@
         <span>⚡ Flexible Paste Parser</span>
         <button onclick="parseChatText()" class="btn btn-amber">Import Data</button>
       </div>
-      <textarea id="pasteInput" rows="4" placeholder="Paste chat data here...&#10;1️⃣ Eddie Zaw&#10;48*30*48 ( 21.95kg )&#10;Shampoo, comb and shaver"></textarea>
+      <textarea id="pasteInput" rows="4" placeholder="Paste chat data here...&#10;1 Eddie Zaw&#10;48*30*48 ( 21.95kg )&#10;Shampoo, comb and shaver"></textarea>
     </div>
 
     <!-- Bulk Photo Upload -->
@@ -465,12 +467,32 @@ function debouncedSave() {
   }, 350);
 }
 
+// နာမည်ရှေ့/ဘေးမှာ ပါလာတဲ့ Box နံပါတ် (ဥပမာ "1 Eddie Zaw", "1️⃣ Eddie Zaw", "Box 1 - Eddie Zaw", "1. Eddie Zaw") ကို ရှင်းထုတ်ခြင်း
+function cleanCustomerName(rawName) {
+  let s = String(rawName || '').trim();
+  if (!s) return "";
+
+  // ရှေ့ဆုံးက Emoji နံပါတ်များ၊ "Box 1" / "No. 1" / "1." / "1)" / "1 -" စတာတွေကို ဖြုတ်မယ်
+  s = s
+    .replace(/^(?:box|no\.?|#)?\s*[0-9️⃣🔟]+\s*(?:[\.\)\-–—:]\s*)?/iu, '')
+    .replace(/^[၀-၉]+\s*(?:[\.\)\-–—:]\s*)?/u, '')
+    .trim();
+
+  // အကယ်၍ ရှေ့ဆုံးမှာ space ခြားပြီး သာမန်နံပါတ်တစ်လုံး (ဥပမာ "1 Eddie Zaw" သို့မဟုတ် "12 Mg Mg") ပါနေရင် ဖြုတ်မယ်
+  s = s.replace(/^\d{1,3}\s+(?=[A-Za-z\u1000-\u109F])/u, '').trim();
+
+  // နောက်ဆုံးမှာ "(Box 1)" ဒါမှမဟုတ် "- 1" လိုမျိုး နံပါတ်ပါနေရင်လည်း ဖြုတ်မယ်
+  s = s.replace(/\s*[\(\[]?\s*(?:box\s*)?\d{1,3}\s*[\)\]]?$/i, '').trim();
+
+  return s;
+}
+
 function normalizeItems(rawItems) {
   if (!Array.isArray(rawItems) || rawItems.length === 0) {
     return [{ name: "", desc: "", kg: 0, l: 0, w: 0, h: 0, img: "" }];
   }
   return rawItems.map(it => ({
-    name: (it.name !== undefined ? it.name : (it.remark || "")).trim(),
+    name: cleanCustomerName(it.name !== undefined ? it.name : (it.remark || "")),
     desc: it.desc || "",
     kg: parseFloat(it.kg) || 0,
     l: parseFloat(it.l) || 0,
@@ -683,7 +705,7 @@ function parseChatText() {
   const text = document.getElementById('pasteInput').value.trim();
   if (!text) return;
 
-  const rawBlocks = text.split(/\n\s*\n|(?=^\s*(?:\d+[\.\)]\s*|[1-9]️⃣\s*))/gm);
+  const rawBlocks = text.split(/\n\s*\n|(?=^\s*(?:\d+[\.\)]\s*|[0-9️⃣🔟]+\s*))/gmu);
   const parsedItems = [];
 
   rawBlocks.forEach(block => {
@@ -709,10 +731,7 @@ function parseChatText() {
       }
 
       if (!weightMatch && !dimMatch) {
-        let cleanedLine = line
-          .replace(/^\s*(?:\d+[\.\)]\s*|[0-9️⃣🔟]+\s*)/u, '')
-          .trim();
-
+        const cleanedLine = cleanCustomerName(line);
         if (!cleanedLine) return;
 
         if (index === 0 || (!name && cleanedLine.length <= 35 && !cleanedLine.includes(','))) {
@@ -854,14 +873,12 @@ function compressImageAsync(file, maxSize = 600) {
   });
 }
 
-// BULK PHOTOS UPLOAD (Sorted by filename + Auto-expand boxes + Upright orientation)
 async function handleBulkPhotosUpload(event) {
   const files = Array.from(event.target.files);
   if (files.length === 0) return;
 
   files.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
 
-  // Auto-expand boxes if uploaded photos exceed current box count
   if (files.length > items.length) {
     const needed = files.length - items.length;
     for (let k = 0; k < needed; k++) {
@@ -1069,23 +1086,25 @@ function updateInvoice() {
 
     const tr = document.createElement('tr');
     tr.style.borderBottom = '1px solid rgba(120, 53, 15, 0.15)';
+    tr.style.breakInside = 'avoid';
+    tr.style.pageBreakInside = 'avoid';
 
     const imgHtml = item.img
-      ? `<img src="${item.img}" onclick="openLightbox(${index})" class="clickable-img" style="width: 135px; height: 135px; object-fit: contain; border-radius: 6px; border: 1px solid #9e7b5c; display: block; margin: 0 auto;">`
+      ? `<img src="${item.img}" onclick="openLightbox(${index})" class="clickable-img" style="width: 130px; height: 130px; object-fit: contain; border-radius: 6px; border: 1px solid #9e7b5c; display: block; margin: 0 auto;">`
       : `<span style="color: #78716c; font-size: 10px;">No Photo</span>`;
 
     tr.innerHTML = `
-      <td style="padding: 10px 4px; text-align: center; font-weight: 800;">${index + 1}</td>
-      <td style="padding: 10px 6px; text-align: left; font-weight: 700; color: #3D2B1F; word-break: break-word;" id="view_name_${index}"></td>
-      <td style="padding: 10px 4px; text-align: center;">${imgHtml}</td>
-      <td style="padding: 10px 6px; text-align: left; word-break: break-word;" id="view_desc_${index}"></td>
-      <td style="padding: 10px 4px; text-align: right; font-weight: 700;">${item.kg.toFixed(2)}</td>
-      <td style="padding: 10px 4px; text-align: center; font-size: 10px;">${item.l}×${item.w}×${item.h}</td>
-      <td style="padding: 10px 4px; text-align: right;">${vol.toFixed(2)}</td>
+      <td style="padding: 8px 4px; text-align: center; font-weight: 800;">${index + 1}</td>
+      <td style="padding: 8px 6px; text-align: left; font-weight: 700; color: #3D2B1F; word-break: break-word;" id="view_name_${index}"></td>
+      <td style="padding: 8px 4px; text-align: center;">${imgHtml}</td>
+      <td style="padding: 8px 6px; text-align: left; word-break: break-word;" id="view_desc_${index}"></td>
+      <td style="padding: 8px 4px; text-align: right; font-weight: 700;">${item.kg.toFixed(2)}</td>
+      <td style="padding: 8px 4px; text-align: center; font-size: 10px;">${item.l}×${item.w}×${item.h}</td>
+      <td style="padding: 8px 4px; text-align: right;">${vol.toFixed(2)}</td>
     `;
     tbody.appendChild(tr);
 
-    tr.querySelector(`#view_name_${index}`).textContent = (item.name || '').trim();
+    tr.querySelector(`#view_name_${index}`).textContent = cleanCustomerName(item.name || '');
     tr.querySelector(`#view_desc_${index}`).textContent = (item.desc || '').trim();
   });
 
@@ -1094,7 +1113,6 @@ function updateInvoice() {
   document.getElementById('viewTotalCbm').innerText = totalV.toFixed(2);
 }
 
-// Lightbox Preview Functions
 function openLightbox(index) {
   if (!items[index] || !items[index].img) return;
   currentLightboxIndex = index;
@@ -1151,23 +1169,32 @@ document.addEventListener('keydown', (e) => {
 });
 
 function exportJPG() {
-  html2canvas(document.getElementById('invoice'), { scale: 3, useCORS: true }).then(canvas => {
+  const el = document.getElementById('invoice');
+  html2canvas(el, {
+    scale: 2.5,
+    useCORS: true,
+    scrollY: -window.scrollY,
+    windowWidth: el.scrollWidth,
+    windowHeight: el.scrollHeight
+  }).then(canvas => {
     const a = document.createElement('a');
     a.download = `${document.getElementById('inputInvNo').value}_Custom_PackingList.jpg`;
-    a.href = canvas.toDataURL('image/jpeg', 1.0);
+    a.href = canvas.toDataURL('image/jpeg', 0.95);
     a.click();
   });
 }
 
 function exportPDF() {
+  const el = document.getElementById('invoice');
   const opt = {
     margin: [8, 8, 8, 8],
     filename: `${document.getElementById('inputInvNo').value}_Custom_PackingList.pdf`,
-    image: { type: 'jpeg', quality: 1.0 },
-    html2canvas: { scale: 3, useCORS: true },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    image: { type: 'jpeg', quality: 0.95 },
+    html2canvas: { scale: 2.5, useCORS: true, scrollY: -window.scrollY },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['css', 'legacy'] }
   };
-  html2pdf().set(opt).from(document.getElementById('invoice')).save();
+  html2pdf().set(opt).from(el).save();
 }
 
 window.onload = init;
