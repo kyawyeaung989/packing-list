@@ -323,7 +323,10 @@
     <div class="card-box">
       <div class="section-title">
         <span>5. Boxes, Name & Images</span>
-        <button onclick="addItem()" class="btn btn-green">+ Add Box</button>
+        <div style="display: flex; gap: 4px;">
+          <button onclick="resetBoxNumbersSequential()" class="btn btn-slate" title="Reset all Box numbers to 1, 2, 3...">Auto #</button>
+          <button onclick="addItem()" class="btn btn-green">+ Add Box</button>
+        </div>
       </div>
       <div id="itemInputsContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
     </div>
@@ -380,10 +383,10 @@
         <table style="width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 11px;">
           <thead>
             <tr class="table-header">
-              <th style="padding: 8px 3px; width: 6%; text-align: center;">Box</th>
+              <th style="padding: 8px 3px; width: 7%; text-align: center;">Box</th>
               <th style="padding: 8px 5px; width: 17%; text-align: left;">Name</th>
               <th style="padding: 8px 3px; width: 22%; text-align: center;">Box Image</th>
-              <th style="padding: 8px 5px; width: 25%; text-align: left;">Description</th>
+              <th style="padding: 8px 5px; width: 24%; text-align: left;">Description</th>
               <th style="padding: 8px 3px; width: 9%; text-align: right;">Kg</th>
               <th style="padding: 8px 3px; width: 12%; text-align: center;">Dim (cm)</th>
               <th style="padding: 8px 3px; width: 9%; text-align: right;">Vol</th>
@@ -412,7 +415,7 @@
 
 <script>
 let items = [
-  { name: "Ko Aung", desc: "Clothes, Books", kg: 18.35, l: 60, w: 50, h: 38, img: "" }
+  { boxNo: "1", name: "Ko Aung", desc: "Clothes, Books", kg: 18.35, l: 60, w: 50, h: 38, img: "" }
 ];
 let savedHistory = [];
 let logoDataUrl = "";
@@ -465,15 +468,11 @@ function debouncedSave() {
   }, 350);
 }
 
-// Name ရှေ့မှာ ပါလာတဲ့ Box နံပါတ် (ဥပမာ "30. Mr Daffern", "1 Eddie Zaw", "1️⃣ Eddie Zaw") ကိုသာ ရှင်းထုတ်ခြင်း
 function stripLeadingBoxNumber(rawName) {
   let s = String(rawName || '').trim();
   if (!s) return "";
 
-  // 1️⃣ / 1. / 1) / 1 - / Box 1 / No. 1 စသဖြင့် ရှေ့ဆုံးနံပါတ်ကို ဖြုတ်မယ်
   s = s.replace(/^(?:box|no\.?|#)?\s*[0-9\u0966-\u096F\uFE0F\u20E3]+\s*(?:[\.\)\-–—:]\s*|\s+)/iu, '').trim();
-
-  // တစ်ခါတလေ Emoji နံပါတ်နောက်မှာ space မပါဘဲ စာဆက်နေရင် ဖြုတ်မယ်
   s = s.replace(/^[0-9\u0966-\u096F\uFE0F\u20E3]+/u, '').trim();
 
   return s;
@@ -481,9 +480,10 @@ function stripLeadingBoxNumber(rawName) {
 
 function normalizeItems(rawItems) {
   if (!Array.isArray(rawItems) || rawItems.length === 0) {
-    return [{ name: "", desc: "", kg: 0, l: 0, w: 0, h: 0, img: "" }];
+    return [{ boxNo: "1", name: "", desc: "", kg: 0, l: 0, w: 0, h: 0, img: "" }];
   }
-  return rawItems.map(it => ({
+  return rawItems.map((it, idx) => ({
+    boxNo: (it.boxNo !== undefined && String(it.boxNo).trim() !== "") ? String(it.boxNo).trim() : String(idx + 1),
     name: (it.name !== undefined ? it.name : (it.remark || "")).trim(),
     desc: it.desc || "",
     kg: parseFloat(it.kg) || 0,
@@ -492,6 +492,14 @@ function normalizeItems(rawItems) {
     h: parseFloat(it.h) || 0,
     img: it.img || ""
   }));
+}
+
+async function resetBoxNumbersSequential() {
+  items.forEach((it, idx) => {
+    it.boxNo = String(idx + 1);
+  });
+  renderItemInputs();
+  await saveAllData();
 }
 
 async function init() {
@@ -684,7 +692,7 @@ function escapeHtml(str) {
 
 async function startNewList() {
   if (confirm("Are you sure you want to clear current draft and start a new Packing List?")) {
-    items = [{ name: "", desc: "", kg: 0, l: 0, w: 0, h: 0, img: "" }];
+    items = [{ boxNo: "1", name: "", desc: "", kg: 0, l: 0, w: 0, h: 0, img: "" }];
     autoNextRefNo();
     setTodayDate();
     document.getElementById('pasteInput').value = '';
@@ -697,7 +705,6 @@ function parseChatText() {
   const text = document.getElementById('pasteInput').value.trim();
   if (!text) return;
 
-  // စာကြောင်းလွတ် (blank line) ဖြင့် block ခွဲမည်
   const rawBlocks = text.split(/\n\s*\n/g);
   const parsedItems = [];
 
@@ -740,7 +747,7 @@ function parseChatText() {
       desc = descLines.join(', ');
     }
 
-    parsedItems.push({ name, desc, kg, l, w, h, img: "" });
+    parsedItems.push({ boxNo: "", name, desc, kg, l, w, h, img: "" });
   });
 
   if (parsedItems.length > 0) {
@@ -749,6 +756,12 @@ function parseChatText() {
     } else {
       items = items.concat(parsedItems);
     }
+
+    items.forEach((it, idx) => {
+      if (!it.boxNo || !String(it.boxNo).trim()) {
+        it.boxNo = String(idx + 1);
+      }
+    });
 
     renderItemInputs();
     saveAllData();
@@ -872,7 +885,8 @@ async function handleBulkPhotosUpload(event) {
   if (files.length > items.length) {
     const needed = files.length - items.length;
     for (let k = 0; k < needed; k++) {
-      items.push({ name: "", desc: "Cargo Items", kg: 0, l: 0, w: 0, h: 0, img: "" });
+      const nextBoxNum = String(items.length + 1);
+      items.push({ boxNo: nextBoxNum, name: "", desc: "Cargo Items", kg: 0, l: 0, w: 0, h: 0, img: "" });
     }
   }
 
@@ -948,6 +962,7 @@ function renderItemInputs() {
   const container = document.getElementById('itemInputsContainer');
   container.innerHTML = '';
   items.forEach((item, index) => {
+    const displayBoxNo = (item.boxNo !== undefined && String(item.boxNo).trim() !== "") ? String(item.boxNo) : String(index + 1);
     const div = document.createElement('div');
     div.className = 'card-box';
 
@@ -956,8 +971,11 @@ function renderItemInputs() {
     if (!item.l || !item.w || !item.h) warnings.push("⚠️ Missing Dimensions (L×W×H)");
 
     div.innerHTML = `
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-size: 11px; font-weight: bold; color: #fbbf24;">Box #${index + 1}</span>
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 6px;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="font-size: 11px; font-weight: bold; color: #fbbf24; white-space: nowrap;">Box #:</span>
+          <input type="text" id="boxNo_${index}" style="width: 72px; padding: 4px 6px; font-size: 11px; font-weight: 700; color: #fbbf24; text-align: center;" title="Edit Box Number manually (e.g. 33 or 33A)">
+        </div>
         <div style="display: flex; gap: 4px;">
           <button onclick="moveItemUp(${index})" class="btn btn-slate" ${index === 0 ? 'disabled' : ''} title="Move Up">↑</button>
           <button onclick="moveItemDown(${index})" class="btn btn-slate" ${index === items.length - 1 ? 'disabled' : ''} title="Move Down">↓</button>
@@ -1007,6 +1025,9 @@ function renderItemInputs() {
     `;
     container.appendChild(div);
 
+    div.querySelector(`#boxNo_${index}`).value = displayBoxNo;
+    div.querySelector(`#boxNo_${index}`).oninput = (e) => { items[index].boxNo = e.target.value; debouncedSave(); };
+
     div.querySelector(`#name_${index}`).value = item.name || '';
     div.querySelector(`#name_${index}`).oninput = (e) => { items[index].name = e.target.value; debouncedSave(); };
 
@@ -1028,14 +1049,17 @@ function renderItemInputs() {
 }
 
 async function addItem() {
-  items.push({ name: "", desc: "Clothes", kg: 10, l: 50, w: 40, h: 40, img: "" });
+  const nextNum = String(items.length + 1);
+  items.push({ boxNo: nextNum, name: "", desc: "Clothes", kg: 10, l: 50, w: 40, h: 40, img: "" });
   renderItemInputs();
   await saveAllData();
 }
 
 async function duplicateItem(index) {
   const original = items[index];
+  const nextNum = String(items.length + 1);
   items.splice(index + 1, 0, {
+    boxNo: nextNum,
     name: original.name,
     desc: original.desc,
     kg: original.kg,
@@ -1073,6 +1097,7 @@ function updateInvoice() {
     totalW += item.kg;
     const vol = (item.l * item.w * item.h) / divisor;
     totalV += vol;
+    const boxLabel = (item.boxNo !== undefined && String(item.boxNo).trim() !== "") ? String(item.boxNo).trim() : String(index + 1);
 
     const tr = document.createElement('tr');
     tr.style.borderBottom = '1px solid rgba(120, 53, 15, 0.15)';
@@ -1084,7 +1109,7 @@ function updateInvoice() {
       : `<span style="color: #78716c; font-size: 10px;">No Photo</span>`;
 
     tr.innerHTML = `
-      <td style="padding: 8px 3px; text-align: center; font-weight: 800;">${index + 1}</td>
+      <td style="padding: 8px 3px; text-align: center; font-weight: 800;" id="view_box_${index}"></td>
       <td style="padding: 8px 5px; text-align: left; font-weight: 700; color: #3D2B1F; word-break: break-word;" id="view_name_${index}"></td>
       <td style="padding: 8px 3px; text-align: center;">${imgHtml}</td>
       <td style="padding: 8px 5px; text-align: left; word-break: break-word;" id="view_desc_${index}"></td>
@@ -1094,6 +1119,7 @@ function updateInvoice() {
     `;
     tbody.appendChild(tr);
 
+    tr.querySelector(`#view_box_${index}`).textContent = boxLabel;
     tr.querySelector(`#view_name_${index}`).textContent = (item.name || '').trim();
     tr.querySelector(`#view_desc_${index}`).textContent = (item.desc || '').trim();
   });
@@ -1106,7 +1132,8 @@ function updateInvoice() {
 function openLightbox(index) {
   if (!items[index] || !items[index].img) return;
   currentLightboxIndex = index;
-  const boxLabel = items[index].name ? `Box #${index + 1} — ${items[index].name}` : `Box #${index + 1}`;
+  const bNo = (items[index].boxNo !== undefined && String(items[index].boxNo).trim() !== "") ? items[index].boxNo : (index + 1);
+  const boxLabel = items[index].name ? `Box #${bNo} — ${items[index].name}` : `Box #${bNo}`;
   document.getElementById('lightboxTitle').innerText = boxLabel;
   document.getElementById('lightboxImg').src = items[index].img;
   document.getElementById('lightboxModal').classList.remove('hidden');
