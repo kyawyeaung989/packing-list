@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AD DAFFODILS - PACKING LIST SYSTEM V2</title>
-  
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -20,7 +20,7 @@
     }
 
     .app-header {
-      max-width: 1450px;
+      max-width: 1480px;
       margin: 0 auto 16px auto;
       background-color: #1e293b;
       padding: 16px;
@@ -34,7 +34,7 @@
     }
 
     .main-grid {
-      max-width: 1450px;
+      max-width: 1480px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: 1fr;
@@ -43,7 +43,7 @@
 
     @media (min-width: 1024px) {
       .main-grid {
-        grid-template-columns: 420px 1fr;
+        grid-template-columns: 430px 1fr;
       }
     }
 
@@ -77,10 +77,11 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 6px;
     }
 
     label { font-size: 11px; font-weight: 600; color: #cbd5e1; margin-bottom: 4px; display: block; }
-    
+
     input[type="text"], input[type="number"], select, textarea {
       width: 100%;
       background-color: #0f172a;
@@ -105,11 +106,15 @@
       font-weight: 700;
       cursor: pointer;
       color: white;
+      transition: opacity 0.15s ease;
     }
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
     .btn-green { background-color: #059669; }
     .btn-amber { background-color: #d97706; }
     .btn-rose { background-color: #e11d48; }
     .btn-blue { background-color: #2563eb; }
+    .btn-slate { background-color: #475569; }
     .btn-action { padding: 8px 16px; font-size: 12px; border-radius: 8px; }
 
     .preview-container {
@@ -120,13 +125,14 @@
       border: 1px solid #334155;
       display: flex;
       justify-content: center;
+      overflow-x: auto;
     }
 
     .invoice-sheet {
       background-color: #ECE3D4;
       color: #3D2B1F;
       width: 100%;
-      max-width: 950px;
+      max-width: 980px;
       min-height: 297mm;
       padding: 15mm 15mm;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
@@ -136,8 +142,17 @@
       box-sizing: border-box;
     }
 
+    thead { display: table-header-group; }
     tr { page-break-inside: avoid; break-inside: avoid; }
-    table td, table th { vertical-align: middle !important; line-height: 1.2; }
+    table td, table th { vertical-align: middle !important; line-height: 1.25; }
+
+    .clickable-img {
+      cursor: zoom-in;
+      transition: transform 0.15s ease;
+    }
+    .clickable-img:hover {
+      transform: scale(1.03);
+    }
 
     .theme-banner { background-color: #9E7B5C; color: #FFFFFF; }
     .table-header { background-color: #9E7B5C; color: #FFFFFF; }
@@ -151,9 +166,51 @@
       padding: 8px 14px;
     }
 
+    /* Lightbox Modal */
+    .lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.92);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      gap: 14px;
+    }
+    .lightbox-img {
+      max-width: 90vw;
+      max-height: 75vh;
+      object-fit: contain;
+      border-radius: 10px;
+      border: 2px solid #d97706;
+      background: #1e293b;
+    }
+    .lightbox-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* History Drawer / Box */
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      background: #1e293b;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #334155;
+      font-size: 11px;
+    }
+
     @media print {
       body { background: white !important; padding: 0 !important; }
-      .no-print { display: none !important; }
+      .no-print, .lightbox-overlay { display: none !important; }
       .preview-container { padding: 0 !important; background: none !important; border: none !important; }
       .invoice-sheet { box-shadow: none !important; width: 100% !important; max-width: none !important; margin: 0 !important; padding: 10mm !important; }
     }
@@ -172,8 +229,9 @@
       <p style="font-size: 11px; color: #94a3b8;">Consignment Logistics & Parsing Dashboard</p>
     </div>
   </div>
-  
-  <div style="display: flex; gap: 10px; align-items: center;">
+
+  <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;">
+    <button onclick="saveCurrentToHistory()" class="btn btn-blue btn-action">💾 Save to History</button>
     <button onclick="startNewList()" class="btn btn-amber btn-action">✨ Start New List</button>
     <button onclick="exportJPG()" class="btn btn-green btn-action">🖼 Export JPG</button>
     <button onclick="exportPDF()" class="btn btn-rose btn-action">📄 Export PDF</button>
@@ -190,16 +248,29 @@
         <span>⚡ Flexible Paste Parser</span>
         <button onclick="parseChatText()" class="btn btn-amber">Import Data</button>
       </div>
-      <textarea id="pasteInput" rows="4" placeholder="Paste chat data here...&#10;30. Mr Daffern&#10;46* 32* 26 ( 8.80kg )&#10;Christmas gift , kitchen tools"></textarea>
+      <textarea id="pasteInput" rows="4" placeholder="Paste chat data here...&#10;1️⃣ Eddie Zaw&#10;48*30*48 ( 21.95kg )&#10;Shampoo, comb and shaver"></textarea>
     </div>
 
-    <!-- Bulk Photo Upload (Multiple Photos at Once) -->
+    <!-- Bulk Photo Upload -->
     <div class="card-box" style="border: 1px solid #059669;">
       <div class="section-title">
         <span>🖼 Upload All Box Photos</span>
       </div>
       <input type="file" id="bulkPhotoInput" multiple accept="image/*" onchange="handleBulkPhotosUpload(event)" style="font-size: 11px;">
-      <p style="font-size: 10px; color: #94a3b8;">Select multiple photos to assign them sequentially to Box #1, #2, #3...</p>
+      <p style="font-size: 10px; color: #94a3b8;">Sorted by filename (1, 2, 3...). Auto-expands boxes if more photos are selected.</p>
+    </div>
+
+    <!-- Saved Packing Lists History & Backup -->
+    <div class="card-box" style="border: 1px solid #2563eb;">
+      <div class="section-title">
+        <span>📂 Saved Lists & Backup</span>
+        <div style="display: flex; gap: 4px;">
+          <button onclick="exportBackupJSON()" class="btn btn-slate" title="Download JSON Backup">⬇ Backup</button>
+          <button onclick="document.getElementById('importBackupInput').click()" class="btn btn-slate" title="Restore JSON Backup">⬆ Restore</button>
+          <input type="file" id="importBackupInput" accept=".json" class="hidden" onchange="importBackupJSON(event)">
+        </div>
+      </div>
+      <div id="historyListContainer" style="display: flex; flex-direction: column; gap: 6px; max-height: 150px; overflow-y: auto;"></div>
     </div>
 
     <!-- Company Logo -->
@@ -251,14 +322,14 @@
     <!-- Items List -->
     <div class="card-box">
       <div class="section-title">
-        <span>5. Items & Images</span>
+        <span>5. Boxes, Name & Images</span>
         <button onclick="addItem()" class="btn btn-green">+ Add Box</button>
       </div>
       <div id="itemInputsContainer" style="display: flex; flex-direction: column; gap: 8px;"></div>
     </div>
   </div>
 
-  <div class="preview-container no-print">
+  <div class="preview-container">
     <div id="invoice" class="invoice-sheet">
       <div>
         <div style="display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12px; border-bottom: 1px solid rgba(120, 53, 15, 0.2);">
@@ -309,13 +380,13 @@
         <table style="width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 11px;">
           <thead>
             <tr class="table-header">
-              <th style="padding: 8px 4px; width: 5%; text-align: center; vertical-align: middle;">Box</th>
-              <th style="padding: 8px 4px; width: 20%; text-align: center; vertical-align: middle;">Box Image</th>
-              <th style="padding: 8px 6px; width: 24%; vertical-align: middle;">Description</th>
-              <th style="padding: 8px 4px; width: 9%; text-align: right; vertical-align: middle;">Kg</th>
-              <th style="padding: 8px 4px; width: 16%; text-align: center; vertical-align: middle;">Dim (cm)</th>
-              <th style="padding: 8px 4px; width: 10%; text-align: right; vertical-align: middle;">Vol</th>
-              <th style="padding: 8px 6px; width: 16%; text-align: center; vertical-align: middle;">Remark</th>
+              <th style="padding: 8px 4px; width: 6%; text-align: center;">Box</th>
+              <th style="padding: 8px 6px; width: 18%; text-align: left;">Name</th>
+              <th style="padding: 8px 4px; width: 22%; text-align: center;">Box Image</th>
+              <th style="padding: 8px 6px; width: 25%; text-align: left;">Description</th>
+              <th style="padding: 8px 4px; width: 8%; text-align: right;">Kg</th>
+              <th style="padding: 8px 4px; width: 13%; text-align: center;">Dim (cm)</th>
+              <th style="padding: 8px 4px; width: 8%; text-align: right;">Vol</th>
             </tr>
           </thead>
           <tbody id="viewTableBody"></tbody>
@@ -327,12 +398,26 @@
   </div>
 </div>
 
+<!-- Lightbox Zoom Preview Modal -->
+<div id="lightboxModal" class="lightbox-overlay hidden" onclick="handleLightboxBackdropClick(event)">
+  <div id="lightboxTitle" style="color: #fbbf24; font-weight: 800; font-size: 14px;">Box #1</div>
+  <img id="lightboxImg" src="" class="lightbox-img" alt="Box Preview">
+  <div class="lightbox-controls">
+    <button onclick="prevLightboxItem()" class="btn btn-slate btn-action">◀ Prev</button>
+    <button onclick="rotateLightboxItem()" class="btn btn-amber btn-action">↻ Rotate 90°</button>
+    <button onclick="nextLightboxItem()" class="btn btn-slate btn-action">Next ▶</button>
+    <button onclick="closeLightbox()" class="btn btn-rose btn-action">✕ Close</button>
+  </div>
+</div>
+
 <script>
 let items = [
-  { desc: "Clothes, Books", kg: 18.35, l: 60, w: 50, h: 38, remark: "Ko Aung", img: "" }
+  { name: "Ko Aung", desc: "Clothes, Books", kg: 18.35, l: 60, w: 50, h: 38, img: "" }
 ];
+let savedHistory = [];
 let logoDataUrl = "";
 let saveTimeout = null;
+let currentLightboxIndex = null;
 
 const DB_NAME = 'ADDaffodils_MasterDB';
 const STORE_NAME = 'packing_store';
@@ -377,11 +462,31 @@ function debouncedSave() {
   clearTimeout(saveTimeout);
   saveTimeout = setTimeout(() => {
     saveAllData();
-  }, 400);
+  }, 350);
+}
+
+function normalizeItems(rawItems) {
+  if (!Array.isArray(rawItems) || rawItems.length === 0) {
+    return [{ name: "", desc: "", kg: 0, l: 0, w: 0, h: 0, img: "" }];
+  }
+  return rawItems.map(it => ({
+    name: (it.name !== undefined ? it.name : (it.remark || "")).trim(),
+    desc: it.desc || "",
+    kg: parseFloat(it.kg) || 0,
+    l: parseFloat(it.l) || 0,
+    w: parseFloat(it.w) || 0,
+    h: parseFloat(it.h) || 0,
+    img: it.img || ""
+  }));
 }
 
 async function init() {
   const savedData = await getFromDB('app_state');
+  const historyData = await getFromDB('saved_history');
+  if (Array.isArray(historyData)) {
+    savedHistory = historyData;
+  }
+
   if (savedData) {
     if (savedData.invNo) document.getElementById('inputInvNo').value = savedData.invNo;
     if (savedData.date) document.getElementById('inputDate').value = savedData.date;
@@ -390,7 +495,7 @@ async function init() {
     if (savedData.senderPhone) document.getElementById('inputSenderPhone').value = savedData.senderPhone;
     if (savedData.recName) document.getElementById('inputRecName').value = savedData.recName;
     if (savedData.recPhone) document.getElementById('inputRecPhone').value = savedData.recPhone;
-    if (savedData.items && Array.isArray(savedData.items)) items = savedData.items;
+    if (savedData.items) items = normalizeItems(savedData.items);
     if (savedData.logo) {
       logoDataUrl = savedData.logo;
       displayImageLogo(logoDataUrl);
@@ -398,29 +503,174 @@ async function init() {
   } else {
     setTodayDate();
   }
+
+  renderHistoryList();
   renderItemInputs();
   updateInvoice();
 }
 
-async function saveAllData() {
-  const state = {
-    invNo: document.getElementById('inputInvNo').value,
-    date: document.getElementById('inputDate').value,
+function getCurrentStateSnapshot() {
+  return {
+    invNo: document.getElementById('inputInvNo').value.trim() || "PL001",
+    date: document.getElementById('inputDate').value.trim(),
     divisor: document.getElementById('inputDivisor').value,
-    senderName: document.getElementById('inputSenderName').value,
-    senderPhone: document.getElementById('inputSenderPhone').value,
-    recName: document.getElementById('inputRecName').value,
-    recPhone: document.getElementById('inputRecPhone').value,
-    items: items,
+    senderName: document.getElementById('inputSenderName').value.trim(),
+    senderPhone: document.getElementById('inputSenderPhone').value.trim(),
+    recName: document.getElementById('inputRecName').value.trim(),
+    recPhone: document.getElementById('inputRecPhone').value.trim(),
+    items: normalizeItems(items),
     logo: logoDataUrl
   };
+}
+
+async function saveAllData() {
+  const state = getCurrentStateSnapshot();
   await saveToDB('app_state', state);
   updateInvoice();
 }
 
+async function saveCurrentToHistory() {
+  const snap = getCurrentStateSnapshot();
+  const entry = {
+    ...snap,
+    id: Date.now(),
+    savedAt: new Date().toLocaleString()
+  };
+
+  const existingIdx = savedHistory.findIndex(h => h.invNo === snap.invNo);
+  if (existingIdx !== -1) {
+    savedHistory[existingIdx] = entry;
+  } else {
+    savedHistory.unshift(entry);
+  }
+
+  await saveToDB('saved_history', savedHistory);
+  renderHistoryList();
+  alert(`Saved "${snap.invNo}" to History!`);
+}
+
+async function loadFromHistory(index) {
+  const entry = savedHistory[index];
+  if (!entry) return;
+
+  document.getElementById('inputInvNo').value = entry.invNo || "PL001";
+  document.getElementById('inputDate').value = entry.date || "";
+  document.getElementById('inputDivisor').value = entry.divisor || "5000";
+  document.getElementById('inputSenderName').value = entry.senderName || "";
+  document.getElementById('inputSenderPhone').value = entry.senderPhone || "";
+  document.getElementById('inputRecName').value = entry.recName || "";
+  document.getElementById('inputRecPhone').value = entry.recPhone || "";
+  items = normalizeItems(entry.items);
+
+  if (entry.logo) {
+    logoDataUrl = entry.logo;
+    displayImageLogo(logoDataUrl);
+  } else {
+    displayTextLogo();
+  }
+
+  renderItemInputs();
+  await saveAllData();
+}
+
+async function deleteHistoryItem(index) {
+  if (!confirm("Delete this saved list from History?")) return;
+  savedHistory.splice(index, 1);
+  await saveToDB('saved_history', savedHistory);
+  renderHistoryList();
+}
+
+function renderHistoryList() {
+  const container = document.getElementById('historyListContainer');
+  if (!container) return;
+
+  if (savedHistory.length === 0) {
+    container.innerHTML = `<div style="font-size: 10px; color: #94a3b8; text-align: center; padding: 6px;">No saved lists yet.</div>`;
+    return;
+  }
+
+  container.innerHTML = '';
+  savedHistory.forEach((h, idx) => {
+    const row = document.createElement('div');
+    row.className = 'history-item';
+    const boxCount = (h.items || []).length;
+    row.innerHTML = `
+      <div style="overflow: hidden; text-overflow: ellipsis;">
+        <strong style="color: #fbbf24;">${escapeHtml(h.invNo)}</strong>
+        <span style="color: #cbd5e1;">(${boxCount} boxes)</span>
+        <div style="font-size: 9px; color: #94a3b8;">${escapeHtml(h.date || '')} • ${escapeHtml(h.recName || '')}</div>
+      </div>
+      <div style="display: flex; gap: 4px; flex-shrink: 0;">
+        <button onclick="loadFromHistory(${idx})" class="btn btn-green">Load</button>
+        <button onclick="deleteHistoryItem(${idx})" class="btn btn-rose">✕</button>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function exportBackupJSON() {
+  const payload = {
+    version: 2,
+    exportedAt: new Date().toISOString(),
+    current: getCurrentStateSnapshot(),
+    history: savedHistory
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ADDaffodils_PackingList_Backup_${document.getElementById('inputInvNo').value || 'V2'}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function importBackupJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (Array.isArray(data.history)) {
+      savedHistory = data.history;
+      await saveToDB('saved_history', savedHistory);
+      renderHistoryList();
+    }
+    if (data.current) {
+      const c = data.current;
+      document.getElementById('inputInvNo').value = c.invNo || "PL001";
+      document.getElementById('inputDate').value = c.date || "";
+      document.getElementById('inputDivisor').value = c.divisor || "5000";
+      document.getElementById('inputSenderName').value = c.senderName || "";
+      document.getElementById('inputSenderPhone').value = c.senderPhone || "";
+      document.getElementById('inputRecName').value = c.recName || "";
+      document.getElementById('inputRecPhone').value = c.recPhone || "";
+      items = normalizeItems(c.items);
+      if (c.logo) {
+        logoDataUrl = c.logo;
+        displayImageLogo(logoDataUrl);
+      } else {
+        displayTextLogo();
+      }
+      renderItemInputs();
+      await saveAllData();
+    }
+    alert("Backup restored successfully!");
+  } catch (err) {
+    alert("Invalid backup file.");
+  }
+  event.target.value = '';
+}
+
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>"']/g, s => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[s]));
+}
+
 async function startNewList() {
   if (confirm("Are you sure you want to clear current draft and start a new Packing List?")) {
-    items = [{ desc: "", kg: 0, l: 0, w: 0, h: 0, remark: "", img: "" }];
+    items = [{ name: "", desc: "", kg: 0, l: 0, w: 0, h: 0, img: "" }];
     autoNextRefNo();
     setTodayDate();
     document.getElementById('pasteInput').value = '';
@@ -433,7 +683,7 @@ function parseChatText() {
   const text = document.getElementById('pasteInput').value.trim();
   if (!text) return;
 
-  const rawBlocks = text.split(/\n\s*\n|(?=^\s*\d+[\.\)]\s+)/gm);
+  const rawBlocks = text.split(/\n\s*\n|(?=^\s*(?:\d+[\.\)]\s*|[1-9]️⃣\s*))/gm);
   const parsedItems = [];
 
   rawBlocks.forEach(block => {
@@ -441,17 +691,17 @@ function parseChatText() {
     if (!blockText) return;
 
     let kg = 0, l = 0, w = 0, h = 0;
-    let remark = "";
+    let name = "";
     let desc = "Cargo Items";
 
     const lines = blockText.split('\n').map(l => l.trim()).filter(Boolean);
-    let descLines = [];
+    const descLines = [];
 
     lines.forEach((line, index) => {
       const weightMatch = line.match(/(\d+(?:\.\d+)?)\s*kg/i);
       if (weightMatch) kg = parseFloat(weightMatch[1]);
 
-      const dimMatch = line.match(/(\d+)\s*[\*xX×]\s*(\d+)\s*[\*xX×]\s*(\d+)/);
+      const dimMatch = line.match(/(\d+(?:\.\d+)?)\s*[\*xX×]\s*(\d+(?:\.\d+)?)\s*[\*xX×]\s*(\d+(?:\.\d+)?)/);
       if (dimMatch) {
         l = parseFloat(dimMatch[1]);
         w = parseFloat(dimMatch[2]);
@@ -459,16 +709,20 @@ function parseChatText() {
       }
 
       if (!weightMatch && !dimMatch) {
-        let cleanedLine = line.replace(/^\s*\d+[\.\)]\s*/, '').trim();
-        
-        if (index === 0 || (!remark && (cleanedLine.length < 30 && !cleanedLine.includes(',')))) {
-          if (!remark) {
-            remark = cleanedLine; 
+        let cleanedLine = line
+          .replace(/^\s*(?:\d+[\.\)]\s*|[0-9️⃣🔟]+\s*)/u, '')
+          .trim();
+
+        if (!cleanedLine) return;
+
+        if (index === 0 || (!name && cleanedLine.length <= 35 && !cleanedLine.includes(','))) {
+          if (!name) {
+            name = cleanedLine;
           } else {
             descLines.push(cleanedLine);
           }
         } else {
-          descLines.push(cleanedLine); 
+          descLines.push(cleanedLine);
         }
       }
     });
@@ -477,11 +731,11 @@ function parseChatText() {
       desc = descLines.join(', ');
     }
 
-    parsedItems.push({ desc, kg, l, w, h, remark, img: "" });
+    parsedItems.push({ name, desc, kg, l, w, h, img: "" });
   });
 
   if (parsedItems.length > 0) {
-    if (items.length === 1 && !items[0].desc && items[0].kg === 0 && !items[0].remark) {
+    if (items.length === 1 && !items[0].desc && items[0].kg === 0 && !items[0].name) {
       items = parsedItems;
     } else {
       items = items.concat(parsedItems);
@@ -490,7 +744,7 @@ function parseChatText() {
     renderItemInputs();
     saveAllData();
     document.getElementById('pasteInput').value = '';
-    alert(`Successfully appended ${parsedItems.length} box(es)!`);
+    alert(`Successfully imported ${parsedItems.length} box(es)!`);
   }
 }
 
@@ -506,7 +760,7 @@ function autoNextRefNo() {
   const invInput = document.getElementById('inputInvNo');
   let val = invInput.value.trim();
   const match = val.match(/^(.*?)(?:\b|_|-)*(\d+)$/);
-  
+
   if (match) {
     const prefix = match[1];
     const numStr = match[2];
@@ -536,11 +790,10 @@ function displayTextLogo() {
 async function handleLogoUpload(event) {
   const file = event.target.files[0];
   if (file) {
-    compressImage(file, 300, async (compressedUrl) => {
-      logoDataUrl = compressedUrl;
-      displayImageLogo(logoDataUrl);
-      await saveAllData();
-    });
+    const compressedUrl = await compressImageAsync(file, 450);
+    logoDataUrl = compressedUrl;
+    displayImageLogo(logoDataUrl);
+    await saveAllData();
   }
 }
 
@@ -557,59 +810,129 @@ function compressImage(file, maxSize, callback) {
       const canvas = document.createElement('canvas');
       let width = img.width;
       let height = img.height;
-      
+
       if (width > height) {
         if (width > maxSize) { height *= maxSize / width; width = maxSize; }
       } else {
         if (height > maxSize) { width *= maxSize / height; height = maxSize; }
       }
-      
-      canvas.width = width;
-      canvas.height = height;
+
+      canvas.width = Math.round(width);
+      canvas.height = Math.round(height);
       const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, width, height);
-      callback(canvas.toDataURL('image/jpeg', 0.85));
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      callback(canvas.toDataURL('image/jpeg', 0.9));
     };
     img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
 
-// BULK PHOTOS UPLOAD (Assigns multiple selected images sequentially to Box #1, #2, #3...)
+function compressImageAsync(file, maxSize = 600) {
+  return new Promise(async (resolve) => {
+    try {
+      const imgBitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+      const canvas = document.createElement('canvas');
+      let width = imgBitmap.width;
+      let height = imgBitmap.height;
+
+      if (width > height) {
+        if (width > maxSize) { height *= maxSize / width; width = maxSize; }
+      } else {
+        if (height > maxSize) { width *= maxSize / height; height = maxSize; }
+      }
+
+      canvas.width = Math.round(width);
+      canvas.height = Math.round(height);
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(imgBitmap, 0, 0, canvas.width, canvas.height);
+      imgBitmap.close();
+      resolve(canvas.toDataURL('image/jpeg', 0.9));
+    } catch (err) {
+      compressImage(file, maxSize, resolve);
+    }
+  });
+}
+
+// BULK PHOTOS UPLOAD (Sorted by filename + Auto-expand boxes + Upright orientation)
 async function handleBulkPhotosUpload(event) {
   const files = Array.from(event.target.files);
   if (files.length === 0) return;
 
-  let processedCount = 0;
-  files.forEach((file, index) => {
-    compressImage(file, 250, async (compressedUrl) => {
-      // If box exists at this index, assign image; otherwise, expand or ignore
-      if (items[index]) {
-        items[index].img = compressedUrl;
-      }
-      processedCount++;
-      if (processedCount === files.length || processedCount === items.length) {
-        renderItemInputs();
-        await saveAllData();
-        alert(`Successfully assigned ${Math.min(files.length, items.length)} photo(s) to boxes sequentially!`);
-      }
-    });
-  });
+  files.sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' }));
+
+  // Auto-expand boxes if uploaded photos exceed current box count
+  if (files.length > items.length) {
+    const needed = files.length - items.length;
+    for (let k = 0; k < needed; k++) {
+      items.push({ name: "", desc: "Cargo Items", kg: 0, l: 0, w: 0, h: 0, img: "" });
+    }
+  }
+
+  for (let i = 0; i < files.length; i++) {
+    items[i].img = await compressImageAsync(files[i], 600);
+  }
+
+  renderItemInputs();
+  await saveAllData();
+  event.target.value = '';
+  alert(`Successfully assigned ${files.length} photo(s) in order to Box #1 to #${files.length}!`);
 }
 
 async function handleBoxImageUpload(event, index) {
   const file = event.target.files[0];
   if (file) {
-    compressImage(file, 250, async (compressedUrl) => {
-      items[index].img = compressedUrl;
-      renderItemInputs();
-      await saveAllData();
-    });
+    items[index].img = await compressImageAsync(file, 600);
+    renderItemInputs();
+    await saveAllData();
   }
+}
+
+async function rotateBoxImage(index) {
+  const dataUrl = items[index].img;
+  if (!dataUrl) return;
+
+  const img = new Image();
+  img.onload = async () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = img.height;
+    canvas.height = img.width;
+    const ctx = canvas.getContext('2d');
+
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate((90 * Math.PI) / 180);
+    ctx.drawImage(img, -img.width / 2, -img.height / 2);
+
+    items[index].img = canvas.toDataURL('image/jpeg', 0.9);
+    renderItemInputs();
+    await saveAllData();
+    if (currentLightboxIndex === index) {
+      document.getElementById('lightboxImg').src = items[index].img;
+    }
+  };
+  img.src = dataUrl;
 }
 
 async function removeBoxImage(index) {
   items[index].img = "";
+  renderItemInputs();
+  await saveAllData();
+}
+
+async function moveItemUp(index) {
+  if (index <= 0) return;
+  const temp = items[index - 1];
+  items[index - 1] = items[index];
+  items[index] = temp;
+  renderItemInputs();
+  await saveAllData();
+}
+
+async function moveItemDown(index) {
+  if (index >= items.length - 1) return;
+  const temp = items[index + 1];
+  items[index + 1] = items[index];
+  items[index] = temp;
   renderItemInputs();
   await saveAllData();
 }
@@ -620,7 +943,7 @@ function renderItemInputs() {
   items.forEach((item, index) => {
     const div = document.createElement('div');
     div.className = 'card-box';
-    
+
     let warnings = [];
     if (!item.kg || item.kg <= 0) warnings.push("⚠️ Missing Weight (Kg)");
     if (!item.l || !item.w || !item.h) warnings.push("⚠️ Missing Dimensions (L×W×H)");
@@ -629,17 +952,27 @@ function renderItemInputs() {
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <span style="font-size: 11px; font-weight: bold; color: #fbbf24;">Box #${index + 1}</span>
         <div style="display: flex; gap: 4px;">
+          <button onclick="moveItemUp(${index})" class="btn btn-slate" ${index === 0 ? 'disabled' : ''} title="Move Up">↑</button>
+          <button onclick="moveItemDown(${index})" class="btn btn-slate" ${index === items.length - 1 ? 'disabled' : ''} title="Move Down">↓</button>
           <button onclick="duplicateItem(${index})" class="btn btn-blue" title="Duplicate Box">+ Copy</button>
-          <button onclick="removeItem(${index})" class="btn btn-rose">✕</button>
+          <button onclick="removeItem(${index})" class="btn btn-rose" title="Delete Box">✕</button>
         </div>
+      </div>
+      <div>
+        <label>Name:</label>
+        <input type="text" id="name_${index}" placeholder="Customer Name">
       </div>
       <div>
         <label>Box Photo / Image (Single):</label>
         <div style="display: flex; gap: 6px; align-items: center;">
           <input type="file" accept="image/*" onchange="handleBoxImageUpload(event, ${index})" style="font-size: 10px; flex: 1;">
-          ${item.img ? `<button onclick="removeBoxImage(${index})" class="btn btn-rose" style="padding: 4px 8px; font-size: 9px;">Remove Photo</button>` : ''}
+          ${item.img ? `
+            <button onclick="openLightbox(${index})" class="btn btn-blue" style="padding: 4px 8px; font-size: 9px;" title="Preview">🔍</button>
+            <button onclick="rotateBoxImage(${index})" class="btn btn-amber" style="padding: 4px 8px; font-size: 9px;" title="Rotate 90°">↻</button>
+            <button onclick="removeBoxImage(${index})" class="btn btn-rose" style="padding: 4px 8px; font-size: 9px;">Remove</button>
+          ` : ''}
         </div>
-        ${item.img ? `<div style="margin-top: 4px;"><img src="${item.img}" style="width: 60px; height: 60px; object-fit: contain; border-radius: 4px; border: 1px solid #334155;"></div>` : ''}
+        ${item.img ? `<div style="margin-top: 4px;"><img src="${item.img}" onclick="openLightbox(${index})" class="clickable-img" style="width: 72px; height: 72px; object-fit: contain; border-radius: 4px; border: 1px solid #334155;"></div>` : ''}
       </div>
       <div>
         <label>Description:</label>
@@ -663,36 +996,32 @@ function renderItemInputs() {
           <input type="number" id="h_${index}" style="text-align: center;">
         </div>
       </div>
-      <div>
-        <label>Remark / Owner Name:</label>
-        <input type="text" id="remark_${index}" placeholder="Customer Name / Remark">
-      </div>
       ${warnings.length > 0 ? `<div class="warning-text">${warnings.join(' | ')}</div>` : ''}
     `;
     container.appendChild(div);
+
+    div.querySelector(`#name_${index}`).value = item.name || '';
+    div.querySelector(`#name_${index}`).oninput = (e) => { items[index].name = e.target.value; debouncedSave(); };
 
     div.querySelector(`#desc_${index}`).value = item.desc || '';
     div.querySelector(`#desc_${index}`).oninput = (e) => { items[index].desc = e.target.value; debouncedSave(); };
 
     div.querySelector(`#kg_${index}`).value = item.kg;
-    div.querySelector(`#kg_${index}`).oninput = (e) => { items[index].kg = parseFloat(e.target.value)||0; debouncedSave(); };
+    div.querySelector(`#kg_${index}`).oninput = (e) => { items[index].kg = parseFloat(e.target.value) || 0; debouncedSave(); };
 
     div.querySelector(`#l_${index}`).value = item.l;
-    div.querySelector(`#l_${index}`).oninput = (e) => { items[index].l = parseFloat(e.target.value)||0; debouncedSave(); };
+    div.querySelector(`#l_${index}`).oninput = (e) => { items[index].l = parseFloat(e.target.value) || 0; debouncedSave(); };
 
     div.querySelector(`#w_${index}`).value = item.w;
-    div.querySelector(`#w_${index}`).oninput = (e) => { items[index].w = parseFloat(e.target.value)||0; debouncedSave(); };
+    div.querySelector(`#w_${index}`).oninput = (e) => { items[index].w = parseFloat(e.target.value) || 0; debouncedSave(); };
 
     div.querySelector(`#h_${index}`).value = item.h;
-    div.querySelector(`#h_${index}`).oninput = (e) => { items[index].h = parseFloat(e.target.value)||0; debouncedSave(); };
-
-    div.querySelector(`#remark_${index}`).value = item.remark || '';
-    div.querySelector(`#remark_${index}`).oninput = (e) => { items[index].remark = e.target.value; debouncedSave(); };
+    div.querySelector(`#h_${index}`).oninput = (e) => { items[index].h = parseFloat(e.target.value) || 0; debouncedSave(); };
   });
 }
 
 async function addItem() {
-  items.push({ desc: "Clothes", kg: 10, l: 50, w: 40, h: 40, remark: "", img: "" });
+  items.push({ name: "", desc: "Clothes", kg: 10, l: 50, w: 40, h: 40, img: "" });
   renderItemInputs();
   await saveAllData();
 }
@@ -700,12 +1029,12 @@ async function addItem() {
 async function duplicateItem(index) {
   const original = items[index];
   items.splice(index + 1, 0, {
+    name: original.name,
     desc: original.desc,
     kg: original.kg,
     l: original.l,
     w: original.w,
     h: original.h,
-    remark: original.remark,
     img: ""
   });
   renderItemInputs();
@@ -741,29 +1070,85 @@ function updateInvoice() {
     const tr = document.createElement('tr');
     tr.style.borderBottom = '1px solid rgba(120, 53, 15, 0.15)';
 
-    const imgHtml = item.img 
-      ? `<img src="${item.img}" style="width: 100px; height: 100px; object-fit: contain; border-radius: 6px; border: 1px solid #9e7b5c; display: block; margin: 0 auto;">`
+    const imgHtml = item.img
+      ? `<img src="${item.img}" onclick="openLightbox(${index})" class="clickable-img" style="width: 135px; height: 135px; object-fit: contain; border-radius: 6px; border: 1px solid #9e7b5c; display: block; margin: 0 auto;">`
       : `<span style="color: #78716c; font-size: 10px;">No Photo</span>`;
 
     tr.innerHTML = `
-      <td style="padding: 10px 4px; text-align: center; font-weight: 800; vertical-align: middle;">${index + 1}</td>
-      <td style="padding: 10px 4px; text-align: center; vertical-align: middle;">${imgHtml}</td>
-      <td style="padding: 10px 6px; vertical-align: middle; word-break: break-word;" id="view_desc_${index}"></td>
-      <td style="padding: 10px 4px; text-align: right; font-weight: 700; vertical-align: middle;">${item.kg.toFixed(2)}</td>
-      <td style="padding: 10px 4px; text-align: center; font-size: 10px; vertical-align: middle;">${item.l}×${item.w}×${item.h}</td>
-      <td style="padding: 10px 4px; text-align: right; vertical-align: middle;">${vol.toFixed(2)}</td>
-      <td style="padding: 10px 6px; text-align: center; font-weight: 700; color: #92400e; vertical-align: middle; word-break: break-word;" id="view_remark_${index}"></td>
+      <td style="padding: 10px 4px; text-align: center; font-weight: 800;">${index + 1}</td>
+      <td style="padding: 10px 6px; text-align: left; font-weight: 700; color: #3D2B1F; word-break: break-word;" id="view_name_${index}"></td>
+      <td style="padding: 10px 4px; text-align: center;">${imgHtml}</td>
+      <td style="padding: 10px 6px; text-align: left; word-break: break-word;" id="view_desc_${index}"></td>
+      <td style="padding: 10px 4px; text-align: right; font-weight: 700;">${item.kg.toFixed(2)}</td>
+      <td style="padding: 10px 4px; text-align: center; font-size: 10px;">${item.l}×${item.w}×${item.h}</td>
+      <td style="padding: 10px 4px; text-align: right;">${vol.toFixed(2)}</td>
     `;
     tbody.appendChild(tr);
 
-    tr.querySelector(`#view_desc_${index}`).textContent = item.desc || '';
-    tr.querySelector(`#view_remark_${index}`).textContent = item.remark || '';
+    tr.querySelector(`#view_name_${index}`).textContent = (item.name || '').trim();
+    tr.querySelector(`#view_desc_${index}`).textContent = (item.desc || '').trim();
   });
 
   document.getElementById('viewTotalBoxes').innerText = items.length;
   document.getElementById('viewTotalWeight').innerText = totalW.toFixed(2);
   document.getElementById('viewTotalCbm').innerText = totalV.toFixed(2);
 }
+
+// Lightbox Preview Functions
+function openLightbox(index) {
+  if (!items[index] || !items[index].img) return;
+  currentLightboxIndex = index;
+  const boxLabel = items[index].name ? `Box #${index + 1} — ${items[index].name}` : `Box #${index + 1}`;
+  document.getElementById('lightboxTitle').innerText = boxLabel;
+  document.getElementById('lightboxImg').src = items[index].img;
+  document.getElementById('lightboxModal').classList.remove('hidden');
+}
+
+function closeLightbox() {
+  currentLightboxIndex = null;
+  document.getElementById('lightboxModal').classList.add('hidden');
+}
+
+function handleLightboxBackdropClick(event) {
+  if (event.target.id === 'lightboxModal') {
+    closeLightbox();
+  }
+}
+
+function rotateLightboxItem() {
+  if (currentLightboxIndex !== null) {
+    rotateBoxImage(currentLightboxIndex);
+  }
+}
+
+function nextLightboxItem() {
+  if (currentLightboxIndex === null) return;
+  for (let offset = 1; offset <= items.length; offset++) {
+    const nextIdx = (currentLightboxIndex + offset) % items.length;
+    if (items[nextIdx] && items[nextIdx].img) {
+      openLightbox(nextIdx);
+      return;
+    }
+  }
+}
+
+function prevLightboxItem() {
+  if (currentLightboxIndex === null) return;
+  for (let offset = 1; offset <= items.length; offset++) {
+    const prevIdx = (currentLightboxIndex - offset + items.length) % items.length;
+    if (items[prevIdx] && items[prevIdx].img) {
+      openLightbox(prevIdx);
+      return;
+    }
+  }
+}
+
+document.addEventListener('keydown', (e) => {
+  if (currentLightboxIndex === null) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowRight') nextLightboxItem();
+  if (e.key === 'ArrowLeft') prevLightboxItem();
+});
 
 function exportJPG() {
   html2canvas(document.getElementById('invoice'), { scale: 3, useCORS: true }).then(canvas => {
